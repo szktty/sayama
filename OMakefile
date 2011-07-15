@@ -1,0 +1,17 @@
+.PHONY: all install clean
+
+CFLAGS +=
+
+OBJS = memory
+
+LIB_NAME = libsayama
+
+LIB = $(StaticCLibrary $(LIB_NAME), $(OBJS))
+
+all: $(LIB)
+
+clean:
+	rm -rf *.o $(LIB_NAME)
+
+.DEFAULT: all
+
