@@ -2,7 +2,7 @@
 
 CFLAGS +=
 
-OBJS = memory
+OBJS = memory utils
 
 LIB_NAME = libsayama
 
