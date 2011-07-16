@@ -1,0 +1,7 @@
+.PHONY: test
+
+test:
+	python test_main.py $(DYLIB)
+
+.DEFAULT: test
+
