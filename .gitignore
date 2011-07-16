@@ -5,4 +5,7 @@ a.out
 *.a
 *.o
 *.omc
+*.pyc
+*.pyo
+*.so
 
