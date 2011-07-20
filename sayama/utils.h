@@ -1,6 +1,7 @@
 #ifndef __SY_UTILS_H__
 #define __SY_UTILS_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -49,6 +50,8 @@ extern void sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
     unsigned int options);
 extern void sy_dump_bytes(const char *path, uint8_t *bytes,
     size_t len, unsigned int options);
+
+extern _Bool sy_load_bytes(uint8_t *dest, const char *path, size_t len);
 
 #ifdef __cplusplus
 }

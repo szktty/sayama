@@ -84,3 +84,60 @@ sy_dump_bytes(const char *path, uint8_t *bytes,
     printf("# error: %s: cannot open - %s\n", __func__, path);
 }
 
+_Bool
+sy_load_bytes(uint8_t *dest, const char *path, size_t len)
+{
+  uint8_t v;
+  FILE *fp = NULL;
+  size_t i;
+  const char *e;
+  char buf;
+  _Bool islow = false;
+
+  fp = fopen(path, "r");
+  if (fp == NULL) {
+    e = "no such file";
+    goto error;
+  }
+
+  for (i = 0; i < len;) {
+    if (fread(&buf, 1, 1, fp) != 1) {
+      e = "eof";
+      goto error;
+    }
+
+    switch (buf) {
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      v = buf - '0';
+      break;
+    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+      v = buf - 'a' + 10;
+      break;
+    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+      v = buf - 'A' + 10;
+      break;
+    case ' ': case '\t': case '\r': case '\n':
+      /* ignore */
+      continue;
+    default:
+      e = "unknown char";
+      goto error;
+    }
+
+    if (islow) {
+      dest[i] = dest[i] << 4 | v;
+      i++;
+    } else
+      dest[i] = v;
+    islow = !islow;
+  }
+  fclose(fp);
+  return true;
+
+error:
+  if (fp != NULL)
+    fclose(fp);
+  return false;
+}
+
