@@ -84,7 +84,7 @@ sy_dump_bytes(const char *path, uint8_t *bytes,
     printf("# error: %s: cannot open - %s\n", __func__, path);
 }
 
-_Bool
+bool
 sy_load_bytes(uint8_t *dest, const char *path, size_t len)
 {
   uint8_t v;
@@ -92,7 +92,7 @@ sy_load_bytes(uint8_t *dest, const char *path, size_t len)
   size_t i;
   const char *e;
   char buf;
-  _Bool islow = false;
+  bool islow = false;
 
   fp = fopen(path, "r");
   if (fp == NULL) {

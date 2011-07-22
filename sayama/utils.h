@@ -51,7 +51,7 @@ extern void sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
 extern void sy_dump_bytes(const char *path, uint8_t *bytes,
     size_t len, unsigned int options);
 
-extern _Bool sy_load_bytes(uint8_t *dest, const char *path, size_t len);
+extern bool sy_load_bytes(uint8_t *dest, const char *path, size_t len);
 
 #ifdef __cplusplus
 }
