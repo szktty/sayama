@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <cutter/cutter.h>
 #include "sayama/memory.h"
 #include "cut-extends.h"
 
