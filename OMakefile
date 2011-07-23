@@ -2,7 +2,7 @@
 
 CFLAGS += -O2 -finline-functions -fomit-frame-pointer -fno-strict-aliasing --param max-inline-insns-single=1800 --param inline-unit-growth=500 --param large-function-growth=900 -Wmissing-prototypes -Wall -std=c99
 
-OBJS = memory utils
+OBJS = aes memory utils
 LIB_NAME = libsayama
 LIB = $(StaticCLibrary $(LIB_NAME), $(OBJS))
 DYLIB = $(DynamicCLibrary $(LIB_NAME), $(OBJS))
@@ -11,7 +11,7 @@ DYLIB = $(DynamicCLibrary $(LIB_NAME), $(OBJS))
 CFLAGS += -I/usr/local/include/cutter
 LDFLAGS += -lcutter
 CUTTER = cutter
-TEST_OBJS = test_memory test_word
+TEST_OBJS = test_aes test_memory test_word
 TEST_LIB_NAME = test_sayama
 TEST_LIB = $(DynamicCLibrary $(TEST_LIB_NAME), $(OBJS) $(TEST_OBJS))
 
