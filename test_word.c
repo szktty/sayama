@@ -2,6 +2,10 @@
 #include "cut-extends.h"
 
 void test_word_value(void);
+void test_land_word1(void);
+void test_land_word2(void);
+void test_land_words(void);
+void test_lxor_word(void);
 void test_lxor_words(void);
 void test_rotl_word(void);
 void test_add_word(void);
@@ -20,6 +24,50 @@ test_word_value()
 
   sy_set_word_value(w2, a);
   cut_assert_equal_bytes(w, w2, 4, cut_message("unexpected word"));
+}
+
+void
+test_land_word1()
+{
+  uint8_t s[] = {0,1,2,3};
+  uint8_t d[] = {8,9,10,11};
+  uint8_t e[] = {0,1,2,3};
+
+  sy_land_word(d, d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("land failed"));
+}
+
+void
+test_land_word2()
+{
+  uint8_t s[] = {0,1,2,3};
+  uint8_t d[] = {1,0,2,1};
+  uint8_t e[] = {0,0,2,1};
+
+  sy_land_word(d, d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("land failed"));
+}
+
+void
+test_land_words()
+{
+  uint8_t s[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  uint8_t d[] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
+  uint8_t e[] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+
+  sy_land_words(d, d, s, 4);
+  cut_assert_equal_bytes(e, d, 16, cut_message("land failed"));
+}
+
+void
+test_lxor_word()
+{
+  uint8_t s[] = {0,1,2,3};
+  uint8_t d[] = {8,9,10,11};
+  uint8_t e[] = {8,8,8,8};
+
+  sy_lxor_word(d, d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("lxor failed"));
 }
 
 void
