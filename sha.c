@@ -74,9 +74,9 @@ sha1_hash_block(uint8_t *state, const uint8_t *block)
 
   sy_copy_words(w, block, 16);
   for (t = 16; t < 80; t++) {
-    sy_xor_word(tmp, W(w, t-3), W(w, t-8));
-    sy_xor_word(tmp, tmp, W(w, t-14));
-    sy_xor_word(tmp, tmp, W(w, t-16));
+    sy_lxor_word(tmp, W(w, t-3), W(w, t-8));
+    sy_lxor_word(tmp, tmp, W(w, t-14));
+    sy_lxor_word(tmp, tmp, W(w, t-16));
     sy_rotl_word(W(w, t), tmp, 1);
   }
 
@@ -131,18 +131,18 @@ sha1_f(uint8_t *dest, unsigned int t,
     sy_land_word(tmp1, b, c);
     sy_invert_word(tmp2, b);
     sy_land_word(tmp2, tmp2, d);
-    sy_xor_word(dest, tmp1, tmp2);
+    sy_lxor_word(dest, tmp1, tmp2);
   } else if (40 <= t && t < 60) {
     /* b & c | b & d | c & d */
     sy_land_word(tmp1, b, c);
     sy_land_word(tmp2, b, d);
     sy_land_word(tmp3, c, d);
-    sy_xor_word(dest, tmp1, tmp2);
-    sy_xor_word(dest, dest, tmp3);
+    sy_lxor_word(dest, tmp1, tmp2);
+    sy_lxor_word(dest, dest, tmp3);
   } else {
     /* b ^ c ^ d */
-    sy_xor_word(dest, b, c);
-    sy_xor_word(dest, dest, d);
+    sy_lxor_word(dest, b, c);
+    sy_lxor_word(dest, dest, d);
   }
 
   sy_memzero_word(tmp1);

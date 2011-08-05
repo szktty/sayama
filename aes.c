@@ -196,14 +196,14 @@ _sy_aes_expand_key(uint8_t *dest, const uint8_t *key,
     if (i % nk == 0) {
       rot_word(x);
       sub_word(x);
-      sy_xor_words(x, x, rcon + i/nk*4, 1);
+      sy_lxor_words(x, x, rcon + i/nk*4, 1);
     }
 
     /* 256 bit key length */
     if (nk == 8 && i % 8 == 4)
       sub_word(x);
 
-    sy_xor_words(x, x, dest + (i-nk)*4, 1);
+    sy_lxor_words(x, x, dest + (i-nk)*4, 1);
     sy_copy_words(dest + i*4, x, 1);
   }
 
@@ -244,7 +244,7 @@ sub_bytes(uint8_t *block)
 static inline void
 add_round_key(uint8_t *block, uint8_t *round_key)
 {
-  sy_xor_words(block, block, round_key, 4);
+  sy_lxor_words(block, block, round_key, 4);
 }
 
 static inline void
