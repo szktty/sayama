@@ -56,7 +56,7 @@ sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     /* hash */
     printf("hash:\n");
     sy_print_bytes(block, 64, SY_PRINT_SP);
-    _sy_sha1_hash(context->state, block);
+    _sy_sha1_hash_block(context->state, block);
   }
 
   sy_memzero(block, 64);
