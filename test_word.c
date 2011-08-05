@@ -1,10 +1,14 @@
 #include "sayama/word.h"
+#include "sayama/utils.h"
 #include "cut-extends.h"
 
 void test_word_value(void);
 void test_land_word1(void);
 void test_land_word2(void);
 void test_land_words(void);
+void test_lor_word1(void);
+void test_lor_word2(void);
+void test_lor_words(void);
 void test_lxor_word(void);
 void test_lxor_words(void);
 void test_invert_word(void);
@@ -59,6 +63,39 @@ test_land_words()
 
   sy_land_words(d, d, s, 4);
   cut_assert_equal_bytes(e, d, 16, cut_message("land failed"));
+}
+
+void
+test_lor_word1()
+{
+  uint8_t s[] = {0,1,2,3};
+  uint8_t d[] = {8,9,10,11};
+  uint8_t e[] = {8,9,10,11};
+
+  sy_lor_word(d, d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("lor failed"));
+}
+
+void
+test_lor_word2()
+{
+  uint8_t s[] = {0x12, 0x34, 0x56, 0x78};
+  uint8_t d[] = {0x0f, 0xed, 0xcb, 0xa9};
+  uint8_t e[] = {0x1f, 0xfd, 0xdf, 0xf9};
+
+  sy_lor_word(d, d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("lor failed"));
+}
+
+void
+test_lor_words()
+{
+  uint8_t s[] = {0, 1, 2, 3, 0x12, 0x34, 0x56, 0x78};
+  uint8_t d[] = {8, 9, 10, 11, 0x0f, 0xed, 0xcb, 0xa9};
+  uint8_t e[] = {8, 9, 10, 11, 0x1f, 0xfd, 0xdf, 0xf9};
+
+  sy_lor_words(d, d, s, 2);
+  cut_assert_equal_bytes(e, d, 8, cut_message("lor failed"));
 }
 
 void

@@ -15,6 +15,10 @@ static inline void sy_land_word(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2);
 static inline void sy_land_words(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2, size_t len);
+static inline void sy_lor_word(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2);
+static inline void sy_lor_words(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2, size_t len);
 static inline void sy_lxor_word(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2);
 static inline void sy_lxor_words(uint8_t *dest,
@@ -67,6 +71,27 @@ sy_land_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
   for (i = 0; i < len; i++) {
     j = i * 4;
     sy_land_word(dest+j, w1+j, w2+j);
+  }
+}
+
+static inline void
+sy_lor_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
+{
+  dest[0] = w1[0] | w2[0];
+  dest[1] = w1[1] | w2[1];
+  dest[2] = w1[2] | w2[2];
+  dest[3] = w1[3] | w2[3];
+}
+
+static inline void
+sy_lor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
+    size_t len)
+{
+  size_t i, j;
+
+  for (i = 0; i < len; i++) {
+    j = i * 4;
+    sy_lor_word(dest+j, w1+j, w2+j);
   }
 }
 
