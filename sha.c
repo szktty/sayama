@@ -4,11 +4,15 @@
 #include "sayama/word.h"
 #include "sha.h"
 
-static uint8_t sha1_K[] = {
-  0x5a, 0x82, 0x79, 0x99,
-  0x6e, 0xd9, 0xeb, 0xa1,
-  0x8f, 0x1b, 0xbc, 0xdc,
-  0xca, 0x62, 0xc1, 0xd6
+static inline void sha1_hash_block(uint8_t *state, const uint8_t *block);
+static inline void sha1_f(uint8_t *dest, unsigned int t,
+    const uint8_t *b, const uint8_t *c, const uint8_t *d);
+
+static uint8_t sha1_K[][4] = {
+  {0, 0, 0, 0x5a}, {0, 0, 0, 0x82}, {0, 0, 0, 0x79}, {0, 0, 0, 0x99},
+  {0, 0, 0, 0x6e}, {0, 0, 0, 0xd9}, {0, 0, 0, 0xeb}, {0, 0, 0, 0xa1},
+  {0, 0, 0, 0x8f}, {0, 0, 0, 0x1b}, {0, 0, 0, 0xbc}, {0, 0, 0, 0xdc},
+  {0, 0, 0, 0xca}, {0, 0, 0, 0x62}, {0, 0, 0, 0xc1}, {0, 0, 0, 0xd6}
 };
 
 void
@@ -56,10 +60,101 @@ sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     /* hash */
     printf("hash:\n");
     sy_print_bytes(block, 64, SY_PRINT_SP);
-    _sy_sha1_hash_block(context->state, block);
+    sha1_hash_block(context->state, block);
   }
 
   sy_memzero(block, 64);
+}
+
+static inline void
+sha1_hash_block(uint8_t *state, const uint8_t *block)
+{
+  uint8_t w[80*4], tmp[4], a[4], b[4], c[4], d[4], e[4];
+  unsigned int t;
+
+  sy_copy_words(w, block, 16);
+  for (t = 16; t < 80; t++) {
+    sy_xor_word(tmp, W(w, t-3), W(w, t-8));
+    sy_xor_word(tmp, tmp, W(w, t-14));
+    sy_xor_word(tmp, tmp, W(w, t-16));
+    sy_rotl_word(W(w, t), tmp, 1);
+  }
+
+  sy_copy_word(a, state);
+  sy_copy_word(b, W(state, 1));
+  sy_copy_word(c, W(state, 2));
+  sy_copy_word(d, W(state, 3));
+  sy_copy_word(e, W(state, 4));
+
+  for (t = 0; t < 80; t++) {
+    sy_rotl_word(tmp, a, 5);
+    sha1_f(tmp, t, b, c, d);
+    sy_add_word(tmp, tmp, e);
+    sy_add_word(tmp, tmp, W(w, t));
+    sy_add_word(tmp, tmp, sha1_K[t/20]);
+    sy_copy_word(e, d);
+    sy_copy_word(d, c);
+    sy_rotl_word(c, b, 30);
+    sy_copy_word(b, a);
+    sy_copy_word(a, tmp);
+  }
+
+  sy_add_word(state, state, a);
+  sy_add_word(W(state, 1), W(state, 1), b);
+  sy_add_word(W(state, 2), W(state, 2), c);
+  sy_add_word(W(state, 3), W(state, 3), d);
+  sy_add_word(W(state, 4), W(state, 4), e);
+
+  sy_memzero(w, 80*4);
+  sy_memzero_word(tmp);
+  sy_memzero_word(a);
+  sy_memzero_word(b);
+  sy_memzero_word(c);
+  sy_memzero_word(d);
+  sy_memzero_word(e);
+}
+
+void
+_sy_sha1_hash_block(uint8_t *state, const uint8_t *block)
+{
+  sha1_hash_block(state, block);
+}
+
+static inline void
+sha1_f(uint8_t *dest, unsigned int t,
+    const uint8_t *b, const uint8_t *c, const uint8_t *d)
+{
+  uint8_t tmp1[4], tmp2[4], tmp3[4];
+
+  if (t < 20) {
+    /* b & c | ~b & d */
+    sy_land_word(tmp1, b, c);
+    sy_invert_word(tmp2, b);
+    sy_land_word(tmp2, tmp2, d);
+    sy_xor_word(dest, tmp1, tmp2);
+  } else if (40 <= t && t < 60) {
+    /* b & c | b & d | c & d */
+    sy_land_word(tmp1, b, c);
+    sy_land_word(tmp2, b, d);
+    sy_land_word(tmp3, c, d);
+    sy_xor_word(dest, tmp1, tmp2);
+    sy_xor_word(dest, dest, tmp3);
+  } else {
+    /* b ^ c ^ d */
+    sy_xor_word(dest, b, c);
+    sy_xor_word(dest, dest, d);
+  }
+
+  sy_memzero_word(tmp1);
+  sy_memzero_word(tmp2);
+  sy_memzero_word(tmp3);
+}
+
+void
+_sy_sha1_f(uint8_t *dest, unsigned int t,
+    const uint8_t *b, const uint8_t *c, const uint8_t *d)
+{
+  sha1_f(dest, t, b, c, d);
 }
 
 void
@@ -73,5 +168,4 @@ sy_sha1_copy(sy_sha1_context *src, sy_sha1_context *dest)
 {
   sy_memmove(dest->state, src->state, SY_SHA1_STATE_LEN);
 }
-
 
