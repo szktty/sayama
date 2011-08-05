@@ -9,6 +9,8 @@ extern "C"
 {
 #endif
 
+#define W(ws,i)     ((ws)+(i)*4)
+
 static inline uint32_t
 sy_word_value(const uint8_t *bytes)
 {
@@ -26,6 +28,36 @@ sy_set_word_value(uint8_t *dest, uint32_t v)
 }
 
 static inline void
+sy_land_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
+{
+  dest[0] = w1[0] & w2[0];
+  dest[1] = w1[1] & w2[1];
+  dest[2] = w1[2] & w2[2];
+  dest[3] = w1[3] & w2[3];
+}
+
+static inline void
+sy_land_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
+    size_t len)
+{
+  size_t i, j;
+
+  for (i = 0; i < len; i++) {
+    j = i * 4;
+    sy_land_word(dest+j, w1+j, w2+j);
+  }
+}
+
+static inline void
+sy_xor_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
+{
+  dest[0] = w1[0] ^ w2[0];
+  dest[1] = w1[1] ^ w2[1];
+  dest[2] = w1[2] ^ w2[2];
+  dest[3] = w1[3] ^ w2[3];
+}
+
+static inline void
 sy_xor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
     size_t len)
 {
@@ -33,10 +65,27 @@ sy_xor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
 
   for (i = 0; i < len; i++) {
     j = i * 4;
-    dest[j+0] = w1[j+0] ^ w2[j+0];
-    dest[j+1] = w1[j+1] ^ w2[j+1];
-    dest[j+2] = w1[j+2] ^ w2[j+2];
-    dest[j+3] = w1[j+3] ^ w2[j+3];
+    sy_xor_word(dest+j, w1+j, w2+j);
+  }
+}
+
+static inline void
+sy_invert_word(uint8_t *dest, const uint8_t *w)
+{
+  dest[0] = ~(w[0]);
+  dest[1] = ~(w[1]);
+  dest[2] = ~(w[2]);
+  dest[3] = ~(w[3]);
+}
+
+static inline void
+sy_invert_words(uint8_t *dest, const uint8_t *w, size_t len)
+{
+  size_t i, j;
+
+  for (i = 0; i < len; i++) {
+    j = i * 4;
+    sy_invert_word(dest+j, w+j);
   }
 }
 
