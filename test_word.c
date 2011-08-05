@@ -7,6 +7,8 @@ void test_land_word2(void);
 void test_land_words(void);
 void test_lxor_word(void);
 void test_lxor_words(void);
+void test_invert_word(void);
+void test_invert_words(void);
 void test_rotl_word(void);
 void test_add_word(void);
 void test_copy_words(void);
@@ -79,6 +81,28 @@ test_lxor_words()
 
   sy_lxor_words(d, d, s, 2);
   cut_assert_equal_bytes(e, d, 8, cut_message("lxor failed"));
+}
+
+void
+test_invert_word()
+{
+  uint8_t s[] = {0,1,2,3};
+  uint8_t d[4];
+  uint8_t e[] = {255,254,253,252};
+
+  sy_invert_word(d, s);
+  cut_assert_equal_bytes(e, d, 4, cut_message("invert failed"));
+}
+
+void
+test_invert_words()
+{
+  uint8_t s[] = {0,1,2,3,4,5,6,7};
+  uint8_t d[4];
+  uint8_t e[] = {255,254,253,252,251,250,249,248};
+
+  sy_invert_words(d, s, 2);
+  cut_assert_equal_bytes(e, d, 8, cut_message("invert failed"));
 }
 
 void
