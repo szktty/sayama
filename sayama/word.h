@@ -82,10 +82,13 @@ sy_copy_word(uint8_t *dest, const uint8_t *src)
 static inline void
 sy_memzero_word(uint8_t *bytes)
 {
-  bytes[0] = 0;
-  bytes[1] = 0;
-  bytes[2] = 0;
-  bytes[3] = 0;
+  volatile uint8_t *vbytes;
+
+  vbytes = (volatile uint8_t *)bytes;
+  vbytes[0] = 0;
+  vbytes[1] = 0;
+  vbytes[2] = 0;
+  vbytes[3] = 0;
 }
 
 #ifdef __cplusplus
