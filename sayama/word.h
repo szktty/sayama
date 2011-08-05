@@ -9,6 +9,28 @@ extern "C"
 {
 #endif
 
+static inline uint32_t sy_word_value(const uint8_t *bytes);
+static inline void sy_set_word_value(uint8_t *dest, uint32_t v);
+static inline void sy_land_word(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2);
+static inline void sy_land_words(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2, size_t len);
+static inline void sy_lxor_word(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2);
+static inline void sy_lxor_words(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2, size_t len);
+static inline void sy_invert_word(uint8_t *dest, const uint8_t *w);
+static inline void sy_invert_words(uint8_t *dest, const uint8_t *w,
+    size_t len);
+static inline void sy_rotl_word(uint8_t *dest, const uint8_t *src,
+    size_t n);
+static inline void sy_add_word(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2);
+static inline void sy_copy_words(uint8_t *dest, const uint8_t *src,
+    size_t len);
+static inline void sy_copy_word(uint8_t *dest, const uint8_t *src);
+static inline void sy_memzero_word(uint8_t *bytes);
+
 #define W(ws,i)     ((ws)+(i)*4)
 
 static inline uint32_t
