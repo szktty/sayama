@@ -131,14 +131,14 @@ sha1_f(uint8_t *dest, unsigned int t,
     sy_land_word(tmp1, b, c);
     sy_invert_word(tmp2, b);
     sy_land_word(tmp2, tmp2, d);
-    sy_lxor_word(dest, tmp1, tmp2);
+    sy_lor_word(dest, tmp1, tmp2);
   } else if (40 <= t && t < 60) {
     /* b & c | b & d | c & d */
     sy_land_word(tmp1, b, c);
     sy_land_word(tmp2, b, d);
     sy_land_word(tmp3, c, d);
-    sy_lxor_word(dest, tmp1, tmp2);
-    sy_lxor_word(dest, dest, tmp3);
+    sy_lor_word(dest, tmp1, tmp2);
+    sy_lor_word(dest, dest, tmp3);
   } else {
     /* b ^ c ^ d */
     sy_lxor_word(dest, b, c);
