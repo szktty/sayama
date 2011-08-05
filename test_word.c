@@ -2,7 +2,7 @@
 #include "cut-extends.h"
 
 void test_word_value(void);
-void test_xor_words(void);
+void test_lxor_words(void);
 void test_rotl_word(void);
 void test_add_word(void);
 void test_copy_words(void);
@@ -23,14 +23,14 @@ test_word_value()
 }
 
 void
-test_xor_words()
+test_lxor_words()
 {
   uint8_t s[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   uint8_t d[] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
   uint8_t e[] = {8,8,8,8,8,8,8,8};
 
-  sy_xor_words(d, d, s, 2);
-  cut_assert_equal_bytes(e, d, 8, cut_message("xor failed"));
+  sy_lxor_words(d, d, s, 2);
+  cut_assert_equal_bytes(e, d, 8, cut_message("lxor failed"));
 }
 
 void
