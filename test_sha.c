@@ -4,9 +4,9 @@
 #include "cut-extends.h"
 #include "sha.h"
 
-void test_sha1();
-void test_sha1_f();
-void test_sha1_hash_block();
+void test_sha1(void);
+void test_sha1_f(void);
+void test_sha1_hash_block(void);
 
 void
 test_sha1()
