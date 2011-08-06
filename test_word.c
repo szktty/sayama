@@ -156,6 +156,11 @@ test_rotl_word()
   sy_set_word_value(e, 0x02020001);
   sy_rotl_word(a, s, 1);
   cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+
+  sy_set_word_value(s, 0xa36f83ae);
+  sy_set_word_value(e, 0xa8dbe0eb);
+  sy_rotl_word(a, s, 30);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
 }
 
 void

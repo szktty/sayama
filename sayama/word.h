@@ -142,7 +142,7 @@ sy_rotl_word(uint8_t *dest, const uint8_t *src, size_t n)
   uint32_t vsrc;
 
   vsrc = sy_word_value(src);
-  vsrc = vsrc << n | (vsrc & (0xff << (32 - n))) >> (32 - n);
+  vsrc = vsrc << n | (vsrc & (0xffffffff << (32 - n))) >> (32 - n);
   sy_set_word_value(dest, vsrc);
 }
 
