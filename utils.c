@@ -67,7 +67,9 @@ sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
     else if ((options & SY_PRINT_SP) && i+1 < len)
       fprintf(f, " ");
   }
-  fprintf(f, "\n");
+
+  if (!(options & SY_PRINT_NOEND))
+    fprintf(f, "\n");
 }
 
 void
