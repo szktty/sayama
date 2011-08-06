@@ -30,38 +30,39 @@ sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     size_t len)
 {
   uint8_t block[64];
-  size_t i;
+  size_t i, n, remains;
   uint64_t mlen;
 
-  while (len > 0) {
-    if (len >= 56) {
-      sy_memmove(block, bytes, 56);
-      len -= 56;
-    } else {
-      /* padding */
-      sy_memmove(block, bytes, len);
-      block[len] = 128; /* 0b10000000 */
-      for (i = len + 1; i < 56; i++)
-        block[i] = 0;
-      len = 0;
-    }
-
-    /* message length (bits) */
-    mlen = len * 8;
-    block[56] = (mlen >> 56) & 0xff;
-    block[57] = (mlen >> 48) & 0xff;
-    block[58] = (mlen >> 40) & 0xff;
-    block[59] = (mlen >> 32) & 0xff;
-    block[60] = (mlen >> 24) & 0xff;
-    block[61] = (mlen >> 16) & 0xff;
-    block[62] = (mlen >> 8) & 0xff;
-    block[63] = mlen & 0xff;
-
-    /* hash */
-    printf("hash:\n");
-    sy_print_bytes(block, 64, SY_PRINT_SP);
-    sha1_hash_block(context->state, block);
+  i = 0;
+  if (len > 64) {
+    n = len - 64;
+    for (; i <= n; i += 64)
+      sha1_hash_block(context->state, bytes+i);
   }
+
+  /* padding */
+  remains = len - i;
+  sy_memmove(block, bytes+i, remains);
+  block[remains] = 0x80; /* 0b10000000 */
+
+  if (remains > 64 - 8 - 1) {
+    sy_memzero(block + remains + 1, 64 - remains - 1);
+    sha1_hash_block(context->state, block);
+    sy_memzero(block, 64 - 8);
+  } else
+    sy_memzero(block + remains + 1, 64 - 8 - remains - 1);
+
+  /* message length (bits) */
+  mlen = len * 8;
+  block[56] = (mlen >> 56) & 0xff;
+  block[57] = (mlen >> 48) & 0xff;
+  block[58] = (mlen >> 40) & 0xff;
+  block[59] = (mlen >> 32) & 0xff;
+  block[60] = (mlen >> 24) & 0xff;
+  block[61] = (mlen >> 16) & 0xff;
+  block[62] = (mlen >> 8) & 0xff;
+  block[63] = mlen & 0xff;
+  sha1_hash_block(context->state, block);
 
   sy_memzero(block, 64);
 }

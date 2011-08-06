@@ -82,7 +82,6 @@ test_sha1_hash_block()
     0xdc, 0xa8, 0x9b, 0x81, 0x3a, 0x2d, 0xb3, 0xfe, 0x1e, 0x83, 0x95, 0xf4};
 
   _sy_sha1_hash_block(block, data);
-  sy_print_bytes(block, 20, SY_PRINT_NL | SY_PRINT_SP);
   cut_assert_equal_bytes(ex, block, 20,
       cut_message("unexpected hashed block"));
 }
