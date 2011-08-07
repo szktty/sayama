@@ -45,7 +45,8 @@ sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
   for (i = 0; i < len; i++) {
     v = bytes[i];
 
-    if (!(options & SY_PRINT_QUIET) && i % per == 0) {
+    if ((options & SY_PRINT_NL) && !(options & SY_PRINT_QUIET) &&
+        i % per == 0) {
       fprintf(f, "#   ");
       if (options & SY_PRINT_INDEX)
         fprintf(f, "%04lu: ", i / per * per);
@@ -68,7 +69,7 @@ sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
       fprintf(f, " ");
   }
 
-  if (!(options & SY_PRINT_NOEND))
+  if (options & SY_PRINT_NL)
     fprintf(f, "\n");
 }
 

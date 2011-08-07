@@ -39,10 +39,9 @@ enum {
   SY_PRINT_SP     = 1 << 5,   /* separate each byte by space */
   SY_PRINT_NL     = 1 << 6,   /* separate bytes by new line */
   SY_PRINT_INDEX  = 1 << 7,   /* print first index in each line */
-  SY_PRINT_NOEND  = 1 << 8,   /* do not print new line at end */
 
   /* compound options */
-  SY_PRINT_PLAIN  = SY_PRINT_QUIET | SY_PRINT_NOEND
+  SY_PRINT_VERBOSE = SY_PRINT_NL | SY_PRINT_SP | SY_PRINT_INDEX
 };
 
 extern void sy_debug(const char *format, ...);
