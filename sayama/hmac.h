@@ -19,7 +19,9 @@ struct sy_hmac_context {
     sy_sha1_context sha1;
     void *p; /* custom digester */
   } digest_context;
-  uint8_t state[SY_HMAC_STATE_LEN];
+  uint8_t key[SY_HMAC_STATE_LEN];
+  uint8_t ipad[SY_HMAC_STATE_LEN];
+  uint8_t opad[SY_HMAC_STATE_LEN];
 };
 
 struct sy_hmac_digester {

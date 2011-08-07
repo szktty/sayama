@@ -17,6 +17,7 @@ test_hmac_sha1()
   sy_hmac_init(&context, key, strlen(key), &sy_hmac_sha1_digester);
   sy_hmac_update(&context, (uint8_t *)msg, strlen(msg));
   sy_hmac_final(&context, a);
+  sy_print_bytes(a, 20, SY_PRINT_VERBOSE);
   cut_assert_equal_bytes(e, a, 20, cut_message("unexpected digest"));
 }
 
