@@ -6,6 +6,7 @@
 
 void test_sha1_short_bytes(void);
 void test_sha1_long_bytes(void);
+void test_sha1_block_len_bytes(void);
 void test_sha1_f(void);
 void test_sha1_hash_block(void);
 
@@ -32,6 +33,21 @@ test_sha1_long_bytes()
   sy_sha1_context context;
 
   sy_load_bytes(e, "test_sha1_digest.txt", 20);
+  sy_sha1_init(&context);
+  sy_sha1_update(&context, (uint8_t *)src, strlen(src));
+  sy_sha1_final(&context, a);
+  cut_assert_equal_bytes(e, a, 20, cut_message("unexpected digest"));
+}
+
+void
+test_sha1_block_len_bytes(void)
+{
+  const char src[] = "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+  uint8_t a[20], e[20];
+  sy_sha1_context context;
+
+  sy_load_bytes(e, "test_sha1_block_len_bytes_digest.txt", 20);
   sy_sha1_init(&context);
   sy_sha1_update(&context, (uint8_t *)src, strlen(src));
   sy_sha1_final(&context, a);
