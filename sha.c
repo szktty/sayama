@@ -34,7 +34,7 @@ sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
   uint64_t mlen;
 
   i = 0;
-  if (len > 64) {
+  if (len >= 64) {
     n = len - 64;
     for (; i <= n; i += 64)
       sha1_hash_block(context->state, bytes+i);
@@ -42,15 +42,12 @@ sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
 
   /* padding */
   remains = len - i;
+  sy_memzero(block, 64);
   sy_memmove(block, bytes+i, remains);
   block[remains] = 0x80; /* 0b10000000 */
 
-  if (remains > 64 - 8 - 1) {
-    sy_memzero(block + remains + 1, 64 - remains - 1);
+  if (remains > 64 - 8 - 1)
     sha1_hash_block(context->state, block);
-    sy_memzero(block, 64 - 8);
-  } else
-    sy_memzero(block + remains + 1, 64 - 8 - remains - 1);
 
   /* message length (bits) */
   mlen = len * 8;
