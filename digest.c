@@ -10,7 +10,8 @@ const sy_digester sy_digester_sha1 = {
   digest_sha1_init,
   digest_sha1_update,
   digest_sha1_final,
-  64
+  64,
+  20
 };
 
 static void
@@ -67,5 +68,11 @@ size_t
 sy_digest_block_len(const sy_digest_context *context)
 {
   return context->digester->block_len;
+}
+
+size_t
+sy_digest_digest_len(const sy_digest_context *context)
+{
+  return context->digester->digest_len;
 }
 

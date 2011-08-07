@@ -25,6 +25,7 @@ struct sy_digester {
       size_t len);
   void (*final)(sy_digest_context *context, uint8_t *dest);
   size_t block_len;
+  size_t digest_len;
 };
 
 extern const sy_digester sy_digester_sha1;
@@ -37,6 +38,7 @@ extern void sy_digest_update(sy_digest_context *context,
     const uint8_t *bytes, size_t len);
 extern void sy_digest_final(sy_digest_context *context, uint8_t *dest);
 extern size_t sy_digest_block_len(const sy_digest_context *context);
+extern size_t sy_digest_digest_len(const sy_digest_context *context);
 
 #ifdef __cplusplus
 }
