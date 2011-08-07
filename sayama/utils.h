@@ -36,12 +36,14 @@ enum {
 
   /* format */
   SY_PRINT_QUIET  = 1 << 4,   /* print no information */
-  SY_PRINT_SP     = 1 << 5,   /* separate each byte by space */
-  SY_PRINT_NL     = 1 << 6,   /* separate bytes by new line */
+  SY_PRINT_SP_SEP = 1 << 5,   /* separate each byte by space */
+  SY_PRINT_NL_SEP = 1 << 6,   /* separate bytes by new line */
   SY_PRINT_INDEX  = 1 << 7,   /* print first index in each line */
+  SY_PRINT_NL     = 1 << 8,   /* print new line at end */
 
   /* compound options */
-  SY_PRINT_VERBOSE = SY_PRINT_NL | SY_PRINT_SP | SY_PRINT_INDEX
+  SY_PRINT_VERBOSE = SY_PRINT_NL_SEP | SY_PRINT_SP_SEP |
+    SY_PRINT_INDEX | SY_PRINT_NL
 };
 
 extern void sy_debug(const char *format, ...);

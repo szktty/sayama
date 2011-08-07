@@ -45,7 +45,7 @@ sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
   for (i = 0; i < len; i++) {
     v = bytes[i];
 
-    if ((options & SY_PRINT_NL) && !(options & SY_PRINT_QUIET) &&
+    if ((options & SY_PRINT_NL_SEP) && !(options & SY_PRINT_QUIET) &&
         i % per == 0) {
       fprintf(f, "#   ");
       if (options & SY_PRINT_INDEX)
@@ -63,9 +63,9 @@ sy_fprint_bytes(FILE *f, uint8_t *bytes, size_t len,
     else
       fprintf(f, "%02x", v);
 
-    if ((options & SY_PRINT_NL) && (i+1) < len && (i+1) % per == 0)
+    if ((options & SY_PRINT_NL_SEP) && (i+1) < len && (i+1) % per == 0)
       fprintf(f, "\n");
-    else if ((options & SY_PRINT_SP) && i+1 < len)
+    else if ((options & SY_PRINT_SP_SEP) && i+1 < len)
       fprintf(f, " ");
   }
 
