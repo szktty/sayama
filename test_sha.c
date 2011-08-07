@@ -4,12 +4,27 @@
 #include "cut-extends.h"
 #include "sha.h"
 
-void test_sha1(void);
+void test_sha1_short_bytes(void);
+void test_sha1_long_bytes(void);
 void test_sha1_f(void);
 void test_sha1_hash_block(void);
 
 void
-test_sha1()
+test_sha1_short_bytes()
+{
+  const char *src = "hello, world!";
+  uint8_t a[200], e[200];
+  sy_sha1_context context;
+
+  sy_load_bytes(e, "test_sha1_short_bytes_digest.txt", 20);
+  sy_sha1_init(&context);
+  sy_sha1_update(&context, (uint8_t *)src, strlen(src));
+  sy_sha1_final(&context, a);
+  cut_assert_equal_bytes(e, a, 20, cut_message("unexpected digest"));
+}
+
+void
+test_sha1_long_bytes()
 {
   const char *src = "0000000000111111111122222222223333333333"
     "444444444455555555556666666666777777777788888888889999999999";
