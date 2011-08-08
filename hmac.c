@@ -2,42 +2,12 @@
 #include "sayama/hmac.h"
 #include "sayama/memory.h"
 #include "sayama/sha.h"
-
-static void hmac_sha1_init(sy_hmac_context *context);
-static void hmac_sha1_update(sy_hmac_context *context, const uint8_t *bytes,
-    size_t len);
-static void hmac_sha1_final(sy_hmac_context *context, uint8_t *dest);
-
-const sy_hmac_digester sy_hmac_sha1_digester = {
-  hmac_sha1_init,
-  hmac_sha1_update,
-  hmac_sha1_final,
-  20
-};
-
-static void
-hmac_sha1_init(sy_hmac_context *context)
-{
-  sy_sha1_init(&context->digest_context.sha1);
-}
-
-static void
-hmac_sha1_update(sy_hmac_context *context, const uint8_t *bytes,
-    size_t len)
-{
-  sy_sha1_update(&context->digest_context.sha1, bytes, len);
-}
-
-static void
-hmac_sha1_final(sy_hmac_context *context, uint8_t *dest)
-{
-  sy_sha1_final(&context->digest_context.sha1, dest);
-}
+#include "sayama/utils.h"
 
 void
 sy_hmac_digest(uint8_t *dest, const uint8_t *key, size_t key_len,
     const uint8_t *msg, size_t msg_len,
-    const sy_hmac_digester *digester)
+    const sy_digester *digester)
 {
   sy_hmac_context context;
 
@@ -48,56 +18,58 @@ sy_hmac_digest(uint8_t *dest, const uint8_t *key, size_t key_len,
 
 void
 sy_hmac_init(sy_hmac_context *context, const uint8_t *key,
-  size_t key_len, const sy_hmac_digester *digester)
+  size_t key_len, const sy_digester *digester)
 {
   size_t blen;
+  uint8_t ipad_key[SY_HMAC_BLOCK_LEN];
 
   context->digester = digester;
+
+  /* padding key */
+  sy_memzero(context->key, SY_HMAC_BLOCK_LEN);
   sy_memmove(context->key, key, key_len);
-  context->digester->init(context);
+
+  /* inner pad */
   blen = digester->block_len;
+  sy_memset(ipad_key, 0x36, blen);
+  sy_lxor_bytes(ipad_key, context->key, ipad_key, blen);
+  sy_digest_init(&context->inner, digester);
+  sy_digest_update(&context->inner, ipad_key, blen);
 
-  /* inner pad: 00110110 */
-  sy_memset(context->ipad, 0x36, blen);
-
-  /* outer pad: 01011100 */
-  sy_memset(context->opad, 0x5c, blen);
-
-  /* xor */
-  sy_lxor_bytes(context->ipad, context->key, context->ipad, blen);
-  sy_lxor_bytes(context->opad, context->key, context->opad, blen);
-
-  context->digester->update(context, context->ipad, blen);
+  sy_memzero(ipad_key, SY_HMAC_BLOCK_LEN);
 }
 
 void
 sy_hmac_update(sy_hmac_context *context, const uint8_t *bytes,
     size_t len)
 {
-  context->digester->update(context, bytes, len);
+  sy_digest_update(&context->inner, bytes, len);
 }
 
 void
 sy_hmac_final(sy_hmac_context *context, uint8_t *dest)
 {
-  uint8_t inner[SY_HMAC_STATE_LEN];
   size_t blen;
+  uint8_t inner[SY_HMAC_BLOCK_LEN];
+  uint8_t opad_key[SY_HMAC_BLOCK_LEN];
+  sy_digest_context outer;
 
+  /* inner */
   blen = context->digester->block_len;
-  context->digester->final(context, inner);
-  context->digester->init(context);
-  context->digester->update(context, context->opad, blen);
-  context->digester->update(context, inner, blen);
-  context->digester->final(context, dest);
+  sy_digest_final(&context->inner, inner);
 
-  sy_memzero(context->key, SY_HMAC_STATE_LEN);
-  sy_memzero(context->ipad, SY_HMAC_STATE_LEN);
-  sy_memzero(context->opad, SY_HMAC_STATE_LEN);
-}
+  /* outer pad */
+  sy_memset(opad_key, 0x5c, blen);
+  sy_lxor_bytes(opad_key, context->key, opad_key, blen);
 
-size_t
-sy_hmac_block_len(sy_hmac_context *context)
-{
-  return context->digester->block_len;
+  /* outer */
+  sy_digest_init(&outer, context->digester);
+  sy_digest_update(&outer, opad_key, blen);
+  sy_digest_update(&outer, inner, context->digester->digest_len);
+  sy_digest_final(&outer, dest);
+
+  sy_memzero(inner, SY_HMAC_BLOCK_LEN);
+  sy_memzero(opad_key, SY_HMAC_BLOCK_LEN);
+  sy_memzero(context->key, SY_HMAC_BLOCK_LEN);
 }
 
