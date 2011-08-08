@@ -68,8 +68,6 @@ test_sha1_updates(void)
   sy_sha1_update(&context, (uint8_t *)m2, strlen(m2));
   sy_sha1_update(&context, (uint8_t *)m3, strlen(m3));
   sy_sha1_final(&context, a);
-  printf("updates!\n\n");
-  sy_print_bytes(a, 20, SY_PRINT_VERBOSE);
   cut_assert_equal_bytes(e, a, 20, cut_message("unexpected digest"));
 }
 

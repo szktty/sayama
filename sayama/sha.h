@@ -13,9 +13,13 @@ extern "C"
 typedef struct sy_sha1_context  sy_sha1_context;
 
 #define SY_SHA1_STATE_LEN       20
+#define SY_SHA1_BLOCK_LEN       64
 
 struct sy_sha1_context {
   uint8_t state[SY_SHA1_STATE_LEN];
+  uint8_t buf[SY_SHA1_BLOCK_LEN];
+  size_t buf_len;
+  size_t total_len;
 };
 
 extern void sy_sha1_digest(uint8_t *digest, const uint8_t *bytes);
