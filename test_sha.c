@@ -11,6 +11,13 @@ void test_sha1_updates(void);
 void test_sha1_f(void);
 void test_sha1_hash_block(void);
 
+void test_sha256_sigma0(void);
+void test_sha256_sigma1(void);
+void test_sha256_ch(void);
+void test_sha256_maj(void);
+void test_sha256_sum0(void);
+void test_sha256_sum1(void);
+
 void
 test_sha1_short_bytes()
 {
@@ -132,5 +139,85 @@ test_sha1_hash_block()
   _sy_sha1_hash_block(block, data);
   cut_assert_equal_bytes(ex, block, 20,
       cut_message("unexpected hashed block"));
+}
+
+void
+test_sha256_sigma0(void)
+{
+  uint8_t e[4], a[4], w[4];
+
+  sy_set_word_value(w, 0x12345678);
+  sy_set_word_value(e, 0xe7fce6ee);
+  _sy_sha256_sigma0(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("1: unexpected value"));
+
+  sy_set_word_value(w, 0x13579bdf);
+  sy_set_word_value(e, 0x5abb9899);
+  _sy_sha256_sigma0(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("2: unexpected value"));
+}
+
+void
+test_sha256_sigma1(void)
+{
+  uint8_t e[4], a[4], w[4];
+
+  sy_set_word_value(w, 0x12345678);
+  sy_set_word_value(e, 0xa1f78649);
+  _sy_sha256_sigma1(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("1: unexpected value"));
+
+  sy_set_word_value(w, 0x13579bdf);
+  sy_set_word_value(e, 0x3e90be27);
+  _sy_sha256_sigma1(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("2: unexpected value"));
+}
+
+void
+test_sha256_ch(void)
+{
+  uint8_t e[4], a[4], w1[4], w2[4], w3[4];
+
+  sy_set_word_value(w1, 0x6a09e667);
+  sy_set_word_value(w2, 0xbb67ae85);
+  sy_set_word_value(w3, 0x3c6ef372);
+  sy_set_word_value(e, 0x3e67b715);
+  _sy_sha256_ch(a, w1, w2, w3);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
+}
+
+void
+test_sha256_maj(void)
+{
+  uint8_t e[4], a[4], w1[4], w2[4], w3[4];
+
+  sy_set_word_value(w1, 0x6a09e667);
+  sy_set_word_value(w2, 0xbb67ae85);
+  sy_set_word_value(w3, 0x3c6ef372);
+  sy_set_word_value(e, 0x3a6fe667);
+  _sy_sha256_maj(a, w1, w2, w3);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
+}
+
+void
+test_sha256_sum0(void)
+{
+  uint8_t e[4], a[4], w[4];
+
+  sy_set_word_value(w, 0x12345678);
+  sy_set_word_value(e, 0x66146474);
+  _sy_sha256_sum0(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
+}
+
+void
+test_sha256_sum1(void)
+{
+  uint8_t e[4], a[4], w[4];
+
+  sy_set_word_value(w, 0x12345678);
+  sy_set_word_value(e, 0x3561abda);
+  _sy_sha256_sum0(a, w);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
 }
 
