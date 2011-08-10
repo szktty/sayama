@@ -28,6 +28,8 @@ static inline void sy_invert_words(uint8_t *dest, const uint8_t *w,
     size_t len);
 static inline void sy_rotl_word(uint8_t *dest, const uint8_t *src,
     size_t n);
+static inline void sy_rotr_word(uint8_t *dest, const uint8_t *src,
+    size_t n);
 static inline void sy_add_word(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2);
 static inline void sy_copy_words(uint8_t *dest, const uint8_t *src,
@@ -143,6 +145,16 @@ sy_rotl_word(uint8_t *dest, const uint8_t *src, size_t n)
 
   vsrc = sy_word_value(src);
   vsrc = vsrc << n | (vsrc & (0xffffffff << (32 - n))) >> (32 - n);
+  sy_set_word_value(dest, vsrc);
+}
+
+static inline void
+sy_rotr_word(uint8_t *dest, const uint8_t *src, size_t n)
+{
+  uint32_t vsrc;
+
+  vsrc = sy_word_value(src);
+  vsrc = vsrc >> n | (vsrc & (0xffffffff >> (32 - n))) << (32 - n);
   sy_set_word_value(dest, vsrc);
 }
 

@@ -14,6 +14,7 @@ void test_lxor_words(void);
 void test_invert_word(void);
 void test_invert_words(void);
 void test_rotl_word(void);
+void test_rotr_word(void);
 void test_add_word(void);
 void test_copy_words(void);
 void test_copy_word(void);
@@ -160,6 +161,26 @@ test_rotl_word()
   sy_set_word_value(s, 0xa36f83ae);
   sy_set_word_value(e, 0xa8dbe0eb);
   sy_rotl_word(a, s, 30);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+}
+
+void
+test_rotr_word()
+{
+  uint8_t e[4], a[4], w[4];
+
+  sy_set_word_value(w, 0x12345678);
+
+  sy_set_word_value(e, 0x091a2b3c);
+  sy_rotr_word(a, w, 1);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+
+  sy_set_word_value(e, 0x048d159e);
+  sy_rotr_word(a, w, 2);
+  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+
+  sy_set_word_value(e, 0x02468acf);
+  sy_rotr_word(a, w, 3);
   cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
 }
 
