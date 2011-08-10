@@ -22,7 +22,7 @@ struct sy_sha1_context {
   size_t total_len;
 };
 
-extern void sy_sha1_digest(uint8_t *digest, const uint8_t *bytes);
+extern void sy_sha1(uint8_t *buf, const uint8_t *data, size_t len);
 extern void sy_sha1_init(sy_sha1_context *context);
 extern void sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     size_t len);

@@ -17,6 +17,16 @@ static uint8_t sha1_K[][4] = {
 };
 
 void
+sy_sha1(uint8_t *buf, const uint8_t *data, size_t len)
+{
+  sy_sha1_context context;
+
+  sy_sha1_init(&context);
+  sy_sha1_update(&context, data, len);
+  sy_sha1_final(&context, buf);
+}
+
+void
 sy_sha1_init(sy_sha1_context *context)
 {
   static uint8_t init[] = { 0x67, 0x45, 0x23, 0x01, 0xef, 0xcd, 0xab,
