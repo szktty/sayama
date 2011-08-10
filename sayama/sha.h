@@ -27,7 +27,6 @@ extern void sy_sha1_init(sy_sha1_context *context);
 extern void sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     size_t len);
 extern void sy_sha1_final(sy_sha1_context *context, uint8_t *dest);
-extern void sy_sha1_copy(sy_sha1_context *src, sy_sha1_context *dest);
 
 #ifdef __cplusplus
 }

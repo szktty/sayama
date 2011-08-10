@@ -195,9 +195,3 @@ sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
 }
 
-void
-sy_sha1_copy(sy_sha1_context *src, sy_sha1_context *dest)
-{
-  sy_memmove(dest->state, src->state, SY_SHA1_STATE_LEN);
-}
-
