@@ -217,7 +217,7 @@ test_sha256_sum1(void)
 
   sy_set_word_value(w, 0x12345678);
   sy_set_word_value(e, 0x3561abda);
-  _sy_sha256_sum0(a, w);
+  _sy_sha256_sum1(a, w);
   cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
 }
 

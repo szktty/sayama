@@ -21,11 +21,15 @@ static inline void sy_lor_words(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2, size_t len);
 static inline void sy_lxor_word(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2);
+static inline void sy_lxor_word3(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2, const uint8_t *w3);
 static inline void sy_lxor_words(uint8_t *dest,
     const uint8_t *w1, const uint8_t *w2, size_t len);
 static inline void sy_invert_word(uint8_t *dest, const uint8_t *w);
 static inline void sy_invert_words(uint8_t *dest, const uint8_t *w,
     size_t len);
+static inline void sy_rshift_word(uint8_t *dest, const uint8_t *src,
+    size_t n);
 static inline void sy_rotl_word(uint8_t *dest, const uint8_t *src,
     size_t n);
 static inline void sy_rotr_word(uint8_t *dest, const uint8_t *src,
@@ -107,6 +111,16 @@ sy_lxor_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
 }
 
 static inline void
+sy_lxor_word3(uint8_t *dest,
+    const uint8_t *w1, const uint8_t *w2, const uint8_t *w3)
+{
+  dest[0] = w1[0] ^ w2[0] ^ w3[0];
+  dest[1] = w1[1] ^ w2[1] ^ w3[1];
+  dest[2] = w1[2] ^ w2[2] ^ w3[2];
+  dest[3] = w1[3] ^ w2[3] ^ w3[3];
+}
+
+static inline void
 sy_lxor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
     size_t len)
 {
@@ -136,6 +150,12 @@ sy_invert_words(uint8_t *dest, const uint8_t *w, size_t len)
     j = i * 4;
     sy_invert_word(dest+j, w+j);
   }
+}
+
+static inline void
+sy_rshift_word(uint8_t *dest, const uint8_t *src, size_t n)
+{
+  sy_set_word_value(dest, sy_word_value(src) >> n);
 }
 
 static inline void
