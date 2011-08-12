@@ -263,10 +263,11 @@ test_sha256_long_msg()
   msg = (char *)malloc(len);
   memset(msg, 'a', len);
 
-  sy_load_bytes(e, "test_sha256_one_block_msg_digest.txt", 32);
+  sy_load_bytes(e, "test_sha256_long_msg_digest.txt", 32);
   sy_sha256_init(&context);
   sy_sha256_update(&context, (uint8_t *)msg, len);
   sy_sha256_final(&context, a);
   cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
+  free(msg);
 }
 
