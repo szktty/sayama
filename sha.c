@@ -4,7 +4,7 @@
 #include "sayama/word.h"
 #include "sha.h"
 
-static void sha1_update(sy_sha1_context *context);
+static void sha1_update(uint8_t *buf, size_t len, sy_sha1_context *context);
 static inline void sha1_hash_block(uint8_t *state, const uint8_t *block);
 static inline void sha1_f(uint8_t *dest, unsigned int t,
     const uint8_t *b, const uint8_t *c, const uint8_t *d);
@@ -52,47 +52,25 @@ void
 sy_sha1_update(sy_sha1_context *context, const uint8_t *bytes,
     size_t len)
 {
-  size_t copy_len, rest_len;
-
   context->total_len += len;
-
-  /* copy bytes to buffer */
-  if (context->buf_len + len > SY_SHA1_BLOCK_LEN)
-    copy_len = SY_SHA1_BLOCK_LEN - context->buf_len;
-  else
-    copy_len = len;
-
-  if (copy_len > 0) {
-    sy_memmove(context->buf + context->buf_len, bytes, copy_len);
-    context->buf_len += copy_len;
-  }
-
-  /* update state with buffer */
-  if (context->buf_len >= SY_SHA1_BLOCK_LEN)
-    sha1_update(context);
-
-  /* copy rest bytes to buffer */
-  rest_len = len - copy_len;
-  if (rest_len > 0) {
-    sy_memmove(context->buf, bytes + copy_len, rest_len);
-    context->buf_len = rest_len;
-  }
+  context->buf_len = sy_append_to_buffer(context->buf,
+      context->buf_len, SY_SHA1_BLOCK_LEN, bytes, len,
+      (sy_buffer_operator)sha1_update, context);
 }
 
 static void
-sha1_update(sy_sha1_context *context)
+sha1_update(uint8_t *block, size_t len, sy_sha1_context *context)
 {
-  uint8_t *block;
   uint64_t mlen;
 
-  block = context->buf;
-  if (context->buf_len >= SY_SHA1_BLOCK_LEN)
+  if (len >= SY_SHA1_BLOCK_LEN)
     sha1_hash_block(context->state, block);
   else {
     /* padding */
-    block[context->buf_len] = 0x80; /* 0b10000000 */
+    block[len] = 0x80; /* 0b10000000 */
+    sy_memzero(block + len + 1, SY_SHA1_BLOCK_LEN - len);
 
-    if (context->buf_len > SY_SHA1_BLOCK_LEN - 8 - 1)
+    if (len > SY_SHA1_BLOCK_LEN - 8 - 1)
       sha1_hash_block(context->state, block);
 
     /* message length (bits) */
@@ -107,9 +85,6 @@ sha1_update(sy_sha1_context *context)
     block[63] = mlen & 0xff;
     sha1_hash_block(context->state, block);
   }
-
-  context->buf_len = 0;
-  sy_memzero(block, SY_SHA1_BLOCK_LEN);
 }
 
 static inline void
@@ -208,7 +183,7 @@ _sy_sha1_f(uint8_t *dest, unsigned int t,
 void
 sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
 {
-  sha1_update(context);
+  sha1_update(context->buf, context->buf_len, context);
   sy_memmove(dest, context->state, SY_SHA1_STATE_LEN);
   sy_memzero(context->state, SY_SHA1_STATE_LEN);
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);

@@ -10,6 +10,9 @@ extern "C"
 {
 #endif
 
+typedef void (*sy_buffer_operator)(uint8_t *buf, size_t len,
+    void *context);
+
 #ifdef DEBUG
 #define debug                   sy_debug
 #define debug_bytes(bs, l, os)  sy_print_bytes((bs), (l), (os))
@@ -57,6 +60,10 @@ extern void sy_dump_bytes(const char *path, uint8_t *bytes,
     size_t len, unsigned int options);
 
 extern bool sy_load_bytes(uint8_t *dest, const char *path, size_t len);
+
+extern size_t sy_append_to_buffer(uint8_t *buf, size_t buf_len,
+    size_t max_buf_len, const uint8_t *bytes, size_t len,
+    sy_buffer_operator op, void *context);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include "sayama/memory.h"
 #include "sayama/utils.h"
 
 void
@@ -142,5 +143,43 @@ error:
   if (fp != NULL)
     fclose(fp);
   return false;
+}
+
+size_t
+sy_append_to_buffer(uint8_t *buf, size_t buf_len,
+    size_t max_buf_len, const uint8_t *bytes, size_t len,
+    sy_buffer_operator op, void *context)
+{
+  size_t copy_len, rest_len;
+
+  while (len >= max_buf_len) {
+    /* copy bytes */
+    if (buf_len + len > max_buf_len)
+      copy_len = max_buf_len - buf_len;
+    else
+      copy_len = len;
+
+    if (copy_len > 0) {
+      sy_memmove(buf + buf_len, bytes, copy_len);
+      buf_len += copy_len;
+      bytes += copy_len;
+      len -= copy_len;
+    }
+
+    /* operating buffer */
+    if (buf_len >= max_buf_len) {
+      if (op != NULL)
+        op(buf, buf_len, context);
+      buf_len = 0;
+    }
+  }
+
+  /* copy rest bytes to buffer */
+  if (len > 0) {
+    sy_memmove(buf + buf_len, bytes, len);
+    buf_len += len;
+  }
+
+  return buf_len;
 }
 
