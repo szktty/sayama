@@ -295,3 +295,29 @@ _sy_sha256_sum1(uint8_t *buf, const uint8_t *w)
   sha256_sum1(buf, w);
 }
 
+void
+sy_sha256(uint8_t *buf, const uint8_t *data, size_t len)
+{
+  sy_sha256_context context;
+
+  sy_sha256_init(&context);
+  sy_sha256_update(&context, data, len);
+  sy_sha256_final(&context, buf);
+}
+
+void
+sy_sha256_init(sy_sha256_context *context)
+{
+}
+
+void
+sy_sha256_update(sy_sha256_context *context,
+    const uint8_t *data, size_t len)
+{
+}
+
+void
+sy_sha256_final(sy_sha256_context *context, uint8_t *buf)
+{
+}
+
