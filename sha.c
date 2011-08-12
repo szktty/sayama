@@ -89,10 +89,14 @@ sha1_update(uint8_t *block, size_t len, sy_sha1_context *context)
   else {
     /* padding */
     block[len] = 0x80; /* 0b10000000 */
-    sy_memzero(block + len + 1, SY_SHA1_BLOCK_LEN - len);
 
-    if (len > SY_SHA1_BLOCK_LEN - 8 - 1)
+    if (len > SY_SHA1_BLOCK_LEN - 8 - 1) {
+      sy_memzero(block + len + 1, SY_SHA1_BLOCK_LEN - len);
       sha1_hash_block(context->state, block);
+      sy_memzero(block, SY_SHA1_BLOCK_LEN - 8);
+    } else
+      sy_memzero(block + len + 1, SY_SHA1_BLOCK_LEN - len - 8);
+
 
     /* message length (bits) */
     mlen = context->total_len * 8;
