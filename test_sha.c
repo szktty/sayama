@@ -17,6 +17,9 @@ void test_sha256_ch(void);
 void test_sha256_maj(void);
 void test_sha256_sum0(void);
 void test_sha256_sum1(void);
+void test_sha256_one_block_msg(void);
+void test_sha256_multi_block_msg(void);
+void test_sha256_long_msg(void);
 
 void
 test_sha1_short_bytes()
@@ -219,5 +222,51 @@ test_sha256_sum1(void)
   sy_set_word_value(e, 0x3561abda);
   _sy_sha256_sum1(a, w);
   cut_assert_equal_bytes(e, a, 4, cut_message("unexpected value"));
+}
+
+void
+test_sha256_one_block_msg()
+{
+  const char msg[] = "abc";
+  uint8_t e[32], a[32];
+  sy_sha256_context context;
+
+  sy_load_bytes(e, "test_sha256_one_block_msg_digest.txt", 32);
+  sy_sha256_init(&context);
+  sy_sha256_update(&context, (uint8_t *)msg, strlen(msg));
+  sy_sha256_final(&context, a);
+  cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
+}
+
+void
+test_sha256_multi_block_msg()
+{
+  const char msg[] = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+  uint8_t e[32], a[32];
+  sy_sha256_context context;
+
+  sy_load_bytes(e, "test_sha256_multi_block_msg_digest.txt", 32);
+  sy_sha256_init(&context);
+  sy_sha256_update(&context, (uint8_t *)msg, strlen(msg));
+  sy_sha256_final(&context, a);
+  cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
+}
+
+void
+test_sha256_long_msg()
+{
+  char *msg;
+  size_t len = 1000000;
+  uint8_t e[32], a[32];
+  sy_sha256_context context;
+
+  msg = (char *)malloc(len);
+  memset(msg, 'a', len);
+
+  sy_load_bytes(e, "test_sha256_one_block_msg_digest.txt", 32);
+  sy_sha256_init(&context);
+  sy_sha256_update(&context, (uint8_t *)msg, len);
+  sy_sha256_final(&context, a);
+  cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
 }
 
