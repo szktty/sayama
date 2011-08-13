@@ -9,6 +9,8 @@ extern "C"
 #endif
 
 extern volatile void *sy_memset(volatile void *buf, int ch, size_t n);
+extern volatile void *sy_memcpy(volatile void *dest,
+    const volatile void *src, size_t n);
 extern volatile void *sy_memmove(volatile void *dest,
     const volatile void *src, size_t n);
 

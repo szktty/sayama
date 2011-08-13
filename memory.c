@@ -15,6 +15,18 @@ sy_memset(volatile void *buf, int ch, size_t n)
 }
 
 volatile void *
+sy_memcpy(volatile void *dest, const volatile void *src, size_t n)
+{
+  volatile uint8_t *vdest, *vsrc;
+
+  vdest = (volatile uint8_t *)dest;
+  vsrc = (volatile uint8_t *)src;
+  while (n--)
+    vdest[n] = vsrc[n];
+  return dest;
+}
+
+volatile void *
 sy_memmove(volatile void *dest, const volatile void *src, size_t n)
 {
   volatile uint8_t *vdest, *vsrc;
