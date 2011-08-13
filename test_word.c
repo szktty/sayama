@@ -5,9 +5,9 @@
 void test_encode_words(void);
 void test_decode_words(void);
 void test_equal_words(void);
-/*
 void test_rotl_word(void);
 void test_rotr_word(void);
+/*
 void test_copy_words(void);
 void test_memset_words(void);
 void test_memzero_words(void);
@@ -126,48 +126,32 @@ test_equal_words()
   cut_assert_false(sy_equal_words(ws1, ws2, 8), cut_message("fail 7"));
 }
 
-/*
 void
 test_rotl_word()
 {
-  uint8_t s[] = {0x6f, 0x2c, 0x20, 0x77};
-  uint8_t e[] = {0xde, 0x58, 0x40, 0xee};
-  uint8_t a[4];
+  cut_assert_equal_word(0xde5840ee,
+      sy_rotl_word(0x6f2c2077, 1), cut_message("unexpected bytes"));
 
-  sy_rotl_word(a, s, 1);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+  cut_assert_equal_word(0x02020001,
+      sy_rotl_word(0x81010000, 1), cut_message("unexpected bytes"));
 
-  sy_set_word_value(s, 0x81010000);
-  sy_set_word_value(e, 0x02020001);
-  sy_rotl_word(a, s, 1);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
-
-  sy_set_word_value(s, 0xa36f83ae);
-  sy_set_word_value(e, 0xa8dbe0eb);
-  sy_rotl_word(a, s, 30);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+  cut_assert_equal_word(0xa8dbe0eb,
+      sy_rotl_word(0xa36f83ae, 30), cut_message("unexpected bytes"));
 }
 
 void
 test_rotr_word()
 {
-  uint8_t e[4], a[4], w[4];
+  cut_assert_equal_word(0x091a2b3c,
+      sy_rotr_word(0x12345678, 1), cut_message("unexpected bytes"));
 
-  sy_set_word_value(w, 0x12345678);
+  cut_assert_equal_word(0x048d159e,
+      sy_rotr_word(0x12345678, 2), cut_message("unexpected bytes"));
 
-  sy_set_word_value(e, 0x091a2b3c);
-  sy_rotr_word(a, w, 1);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
-
-  sy_set_word_value(e, 0x048d159e);
-  sy_rotr_word(a, w, 2);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
-
-  sy_set_word_value(e, 0x02468acf);
-  sy_rotr_word(a, w, 3);
-  cut_assert_equal_bytes(e, a, 4, cut_message("unexpected bytes"));
+  cut_assert_equal_word(0x02468acf,
+      sy_rotr_word(0x12345678, 3), cut_message("unexpected bytes"));
 }
-
+/*
 void
 test_copy_words()
 {

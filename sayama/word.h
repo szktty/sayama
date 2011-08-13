@@ -105,7 +105,7 @@ sy_rotl_word(sy_word word, size_t n)
 static inline sy_word
 sy_rotr_word(sy_word word, size_t n)
 {
-  return word << n | (word & (0xffffffff >> (32 - n))) << (32 - n);
+  return word >> n | (word & (0xffffffff >> (32 - n))) << (32 - n);
 }
 
 static inline void
