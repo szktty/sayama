@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include "sayama/memory.h"
 
-void *
-sy_memset(void *buf, int ch, size_t n)
+volatile void *
+sy_memset(volatile void *buf, int ch, size_t n)
 {
   volatile uint8_t *vbuf;
   size_t i;
@@ -14,8 +14,8 @@ sy_memset(void *buf, int ch, size_t n)
   return buf;
 }
 
-void *
-sy_memmove(void *dest, const void *src, size_t n)
+volatile void *
+sy_memmove(volatile void *dest, const volatile void *src, size_t n)
 {
   volatile uint8_t *vdest, *vsrc;
   size_t i;

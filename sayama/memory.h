@@ -8,11 +8,12 @@ extern "C"
 {
 #endif
 
-extern void *sy_memset(void *buf, int ch, size_t n);
-extern void *sy_memmove(void *dest, const void *src, size_t n);
+extern volatile void *sy_memset(volatile void *buf, int ch, size_t n);
+extern volatile void *sy_memmove(volatile void *dest,
+    const volatile void *src, size_t n);
 
-static inline void *
-sy_memzero(void *buf, size_t n)
+static inline volatile void *
+sy_memzero(volatile void *buf, size_t n)
 {
   return sy_memset(buf, 0, n);
 }
