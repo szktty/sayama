@@ -31,24 +31,31 @@ sy_encode_words(sy_word *words, const uint8_t *bytes,
 {
   size_t i;
 
-  i = 0;
   if (len >= 4) {
-    for (; i < len - 4; i += 4) {
+    for (i = 0; i + 3 < len; i += 4) {
       words[i/4] = bytes[i] << 24 | bytes[i+1] << 16 |
         bytes[i+2] << 8 | bytes[i+3];
     }
   }
 
-  if (i < len) {
-    words[i/4] = bytes[i] << 24 | padding << 16 | padding << 8 | padding;
-    if (++i < len) {
-      words[i/4] = (words[i/4] & 0xff00ffff) | bytes[i] << 16;
-      if (++i < len) {
-        words[i/4] = (words[i/4] & 0xffff00ff) | bytes[i] << 8;
-        if (++i < len)
-          words[i/4] = (words[i/4] & 0xffffff00) | bytes[i];
-      }
-    }
+  switch (len % 4) {
+  case 0:
+    break;
+
+  case 1:
+    words[len/4] = bytes[len/4*4] << 24 | padding << 16 |
+      padding << 8 | padding;
+    break;
+
+  case 2:
+    words[len/4] = bytes[len/4*4] << 24 | bytes[len/4*4+1] << 16 |
+      padding << 8 | padding;
+    break;
+
+  case 3:
+    words[len/4] = bytes[len/4*4] << 24 | bytes[len/4*4+1] << 16 |
+      bytes[len/4*4+2] << 8 | padding;
+    break;
   }
 }
 
@@ -58,9 +65,8 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
   sy_word w;
   size_t i;
 
-  i = 0;
   if (len >= 4) {
-    for (i = 0; i < len - 4; i += 4) {
+    for (i = 0; i + 3 < len; i += 4) {
       w = words[i/4];
       bytes[i] = (w >> 24) & 0xff;
       bytes[i+1] = (w >> 16) & 0xff;
@@ -69,16 +75,19 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
     }
   }
 
-  if (i < len) {
-    bytes[i] = (words[i/4] >> 24) & 0xff;
-    if (++i < len) {
-      bytes[i] = (words[i/4] >> 16) & 0xff;
-      if (++i < len) {
-        bytes[i] = (words[i/4] >> 8) & 0xff;
-        if (++i < len)
-          bytes[i] = words[i/4] & 0xff;
-      }
-    }
+  switch (len % 4) {
+  case 0:
+    break;
+
+  case 3:
+    bytes[len/4*4+2] = (words[len/4] >> 8) & 0xff;
+
+  case 2:
+    bytes[len/4*4+1] = (words[len/4] >> 16) & 0xff;
+
+  case 1:
+    bytes[len/4*4] = (words[len/4] >> 24) & 0xff;
+    break;
   }
 }
 
