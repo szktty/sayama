@@ -31,19 +31,22 @@ sy_encode_words(sy_word *words, const uint8_t *bytes,
 {
   size_t i;
 
-  for (i = 0; i < len - 4; i += 4) {
-    words[i/4] = bytes[i] << 24 | bytes[i+1] << 16 |
-      bytes[i+2] << 8 | bytes[i+3];
+  i = 0;
+  if (len >= 4) {
+    for (; i < len - 4; i += 4) {
+      words[i/4] = bytes[i] << 24 | bytes[i+1] << 16 |
+        bytes[i+2] << 8 | bytes[i+3];
+    }
   }
 
   if (i < len) {
     words[i/4] = bytes[i] << 24 | padding << 16 | padding << 8 | padding;
     if (++i < len) {
-      words[i/4] |= bytes[i] << 16;
+      words[i/4] = (words[i/4] & 0xff00ffff) | bytes[i] << 16;
       if (++i < len) {
-        words[i/4] |= bytes[i] << 8;
+        words[i/4] = (words[i/4] & 0xffff00ff) | bytes[i] << 8;
         if (++i < len)
-          words[i/4] |= bytes[i];
+          words[i/4] = (words[i/4] & 0xffffff00) | bytes[i];
       }
     }
   }
@@ -55,12 +58,15 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
   sy_word w;
   size_t i;
 
-  for (i = 0; i < len - 4; i += 4) {
-    w = words[i/4];
-    bytes[i] = (w >> 24) & 0xff;
-    bytes[i+1] = (w >> 16) & 0xff;
-    bytes[i+2] = (w >> 8) & 0xff;
-    bytes[i+3] = w & 0xff;
+  i = 0;
+  if (len >= 4) {
+    for (i = 0; i < len - 4; i += 4) {
+      w = words[i/4];
+      bytes[i] = (w >> 24) & 0xff;
+      bytes[i+1] = (w >> 16) & 0xff;
+      bytes[i+2] = (w >> 8) & 0xff;
+      bytes[i+3] = w & 0xff;
+    }
   }
 
   if (i < len) {
@@ -115,8 +121,11 @@ sy_memset_words(sy_word *words, uint8_t v, size_t len)
   sy_word vw;
 
   vw = v << 24 | v << 16 | v << 8 | v;
-  for (i = 0; i < len - 4; i += 4)
-    words[i/4] = vw;
+  i = 0;
+  if (len >= 4) {
+    for (i = 0; i < len - 4; i += 4)
+      words[i/4] = vw;
+  }
 
   if (i < len) {
     words[i/4] = (words[i/4] & 0x00ffffff) | v << 24;
