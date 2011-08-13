@@ -111,7 +111,25 @@ sy_rotr_word(sy_word word, size_t n)
 static inline void
 sy_copy_words(sy_word *dest, const sy_word *src, size_t len)
 {
-  sy_memmove(dest, src, len*4);
+  if (len >= 4)
+    sy_memmove(dest, src, len / 4 * 4);
+
+  switch (len % 4) {
+  case 0:
+    break;
+
+  case 1:
+    dest[len/4] = (dest[len/4] & 0x00ffffff) | (src[len/4] & 0xff000000);
+    break;
+
+  case 2:
+    dest[len/4] = (dest[len/4] & 0x0000ffff) | (src[len/4] & 0xffff0000);
+    break;
+
+  case 3:
+    dest[len/4] = (dest[len/4] & 0x000000ff) | (src[len/4] & 0xffffff00);
+    break;
+  }
 }
 
 static inline sy_word *
@@ -120,9 +138,9 @@ sy_memset_words(sy_word *words, uint8_t v, size_t len)
   size_t i;
   sy_word vw;
 
-  vw = v << 24 | v << 16 | v << 8 | v;
   i = 0;
   if (len >= 4) {
+    vw = v << 24 | v << 16 | v << 8 | v;
     for (i = 0; i < len - 4; i += 4)
       words[i/4] = vw;
   }

@@ -7,8 +7,8 @@ void test_decode_words(void);
 void test_equal_words(void);
 void test_rotl_word(void);
 void test_rotr_word(void);
-/*
 void test_copy_words(void);
+/*
 void test_memset_words(void);
 void test_memzero_words(void);
 */
@@ -151,14 +151,51 @@ test_rotr_word()
   cut_assert_equal_word(0x02468acf,
       sy_rotr_word(0x12345678, 3), cut_message("unexpected bytes"));
 }
-/*
+
 void
 test_copy_words()
 {
-  uint8_t s[4] = {0,1,2,3};
-  uint8_t d[4] = {0,0,0,0};
+  sy_word a[2], e[] = {0x12345678, 0x9abcdef0};
+  sy_word w[] = {0x12345678, 0x9abcdef0};
 
-  sy_copy_words(d, s, 1);
-  cut_assert_equal_bytes(s, d, 4, cut_message("copy failed"));
+  sy_copy_words(a, w, 8);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[1] = 0xffffffff;
+  e[1] = 0x9abcdeff;
+  sy_copy_words(a, w, 7);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[1] = 0xffffffff;
+  e[1] = 0x9abcffff;
+  sy_copy_words(a, w, 6);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[1] = 0xffffffff;
+  e[1] = 0x9affffff;
+  sy_copy_words(a, w, 5);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x12345678;
+  e[1] = 0x9abcdef0;
+  sy_copy_words(a, w, 4);
+  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  e[0] = 0x123456ff;
+  sy_copy_words(a, w, 3);
+  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  e[0] = 0x1234ffff;
+  sy_copy_words(a, w, 2);
+  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  e[0] = 0x12ffffff;
+  sy_copy_words(a, w, 1);
+  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
 }
-*/
+
