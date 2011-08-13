@@ -2,6 +2,7 @@
 #define __SY_WORD_H__
 
 #include <sayama/memory.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -9,214 +10,132 @@ extern "C"
 {
 #endif
 
-static inline uint32_t sy_word_value(const uint8_t *bytes);
-static inline void sy_set_word_value(uint8_t *dest, uint32_t v);
-static inline void sy_land_word(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2);
-static inline void sy_land_words(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2, size_t len);
-static inline void sy_lor_word(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2);
-static inline void sy_lor_words(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2, size_t len);
-static inline void sy_lxor_word(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2);
-static inline void sy_lxor_word3(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2, const uint8_t *w3);
-static inline void sy_lxor_words(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2, size_t len);
-static inline void sy_invert_word(uint8_t *dest, const uint8_t *w);
-static inline void sy_invert_words(uint8_t *dest, const uint8_t *w,
+typedef uint32_t sy_word;
+
+static inline void sy_encode_words(sy_word *words, const uint8_t *bytes,
+    size_t len, uint8_t padding);
+static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
     size_t len);
-static inline void sy_rshift_word(uint8_t *dest, const uint8_t *src,
-    size_t n);
-static inline void sy_rotl_word(uint8_t *dest, const uint8_t *src,
-    size_t n);
-static inline void sy_rotr_word(uint8_t *dest, const uint8_t *src,
-    size_t n);
-static inline void sy_add_word(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2);
-static inline void sy_copy_words(uint8_t *dest, const uint8_t *src,
+static inline bool sy_equal_words(const sy_word *words1,
+    const sy_word *words2, size_t len);
+static inline sy_word sy_rotl_word(sy_word word, size_t n);
+static inline sy_word sy_rotr_word(sy_word word, size_t n);
+static inline void sy_copy_words(sy_word *dest, const sy_word *src,
     size_t len);
-static inline void sy_copy_word(uint8_t *dest, const uint8_t *src);
-static inline void sy_memzero_word(uint8_t *bytes);
-
-#define W(ws,i)     ((ws)+(i)*4)
-
-static inline uint32_t
-sy_word_value(const uint8_t *bytes)
-{
-  return (uint32_t)(bytes[0] << 24 | bytes[1] << 16 |
-      bytes[2] << 8 | bytes[3]);
-}
+static inline sy_word *sy_memset_words(sy_word *words, uint8_t v, size_t len);
+static inline sy_word *sy_memzero_words(sy_word *words, size_t len);
 
 static inline void
-sy_set_word_value(uint8_t *dest, uint32_t v)
+sy_encode_words(sy_word *words, const uint8_t *bytes,
+    size_t len, uint8_t padding)
 {
-  dest[0] = (v >> 24) & 0xff;
-  dest[1] = (v >> 16) & 0xff;
-  dest[2] = (v >> 8) & 0xff;
-  dest[3] = v & 0xff;
-}
+  size_t i;
 
-static inline void
-sy_land_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
-{
-  dest[0] = w1[0] & w2[0];
-  dest[1] = w1[1] & w2[1];
-  dest[2] = w1[2] & w2[2];
-  dest[3] = w1[3] & w2[3];
-}
+  for (i = 0; i < len - 4; i += 4) {
+    words[i/4] = bytes[i] << 24 | bytes[i+1] << 16 |
+      bytes[i+2] << 8 | bytes[i+3];
+  }
 
-static inline void
-sy_land_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
-    size_t len)
-{
-  size_t i, j;
-
-  for (i = 0; i < len; i++) {
-    j = i * 4;
-    sy_land_word(dest+j, w1+j, w2+j);
+  if (i < len) {
+    words[i/4] = bytes[i] << 24 | padding << 16 | padding << 8 | padding;
+    if (++i < len) {
+      words[i/4] |= bytes[i] << 16;
+      if (++i < len) {
+        words[i/4] |= bytes[i] << 8;
+        if (++i < len)
+          words[i/4] |= bytes[i];
+      }
+    }
   }
 }
 
 static inline void
-sy_lor_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
+sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
 {
-  dest[0] = w1[0] | w2[0];
-  dest[1] = w1[1] | w2[1];
-  dest[2] = w1[2] | w2[2];
-  dest[3] = w1[3] | w2[3];
-}
+  sy_word w;
+  size_t i;
 
-static inline void
-sy_lor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
-    size_t len)
-{
-  size_t i, j;
+  for (i = 0; i < len - 4; i += 4) {
+    w = words[i/4];
+    bytes[i] = (w >> 24) & 0xff;
+    bytes[i+1] = (w >> 16) & 0xff;
+    bytes[i+2] = (w >> 8) & 0xff;
+    bytes[i+3] = w & 0xff;
+  }
 
-  for (i = 0; i < len; i++) {
-    j = i * 4;
-    sy_lor_word(dest+j, w1+j, w2+j);
+  if (i < len) {
+    bytes[i] = (words[i/4] >> 24) & 0xff;
+    if (++i < len) {
+      bytes[i] = (words[i/4] >> 16) & 0xff;
+      if (++i < len) {
+        bytes[i] = (words[i/4] >> 8) & 0xff;
+        if (++i < len)
+          bytes[i] = words[i/4] & 0xff;
+      }
+    }
   }
 }
 
-static inline void
-sy_lxor_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
+static inline bool
+sy_equal_words(const sy_word *words1, const sy_word *words2, size_t len)
 {
-  dest[0] = w1[0] ^ w2[0];
-  dest[1] = w1[1] ^ w2[1];
-  dest[2] = w1[2] ^ w2[2];
-  dest[3] = w1[3] ^ w2[3];
-}
-
-static inline void
-sy_lxor_word3(uint8_t *dest,
-    const uint8_t *w1, const uint8_t *w2, const uint8_t *w3)
-{
-  dest[0] = w1[0] ^ w2[0] ^ w3[0];
-  dest[1] = w1[1] ^ w2[1] ^ w3[1];
-  dest[2] = w1[2] ^ w2[2] ^ w3[2];
-  dest[3] = w1[3] ^ w2[3] ^ w3[3];
-}
-
-static inline void
-sy_lxor_words(uint8_t *dest, const uint8_t *w1, const uint8_t *w2,
-    size_t len)
-{
-  size_t i, j;
+  size_t i;
+  unsigned int n;
 
   for (i = 0; i < len; i++) {
-    j = i * 4;
-    sy_lxor_word(dest+j, w1+j, w2+j);
+    n = (3-i % 4) * 8;
+    if (((words1[i/4] >> n) & 0xff) != ((words2[i/4] >> n) & 0xff))
+      return false;
   }
+  return true;
 }
 
-static inline void
-sy_invert_word(uint8_t *dest, const uint8_t *w)
+static inline sy_word
+sy_rotl_word(sy_word word, size_t n)
 {
-  dest[0] = ~(w[0]);
-  dest[1] = ~(w[1]);
-  dest[2] = ~(w[2]);
-  dest[3] = ~(w[3]);
+  return word << n | (word & (0xffffffff << (32 - n))) >> (32 - n);
 }
 
-static inline void
-sy_invert_words(uint8_t *dest, const uint8_t *w, size_t len)
+static inline sy_word
+sy_rotr_word(sy_word word, size_t n)
 {
-  size_t i, j;
-
-  for (i = 0; i < len; i++) {
-    j = i * 4;
-    sy_invert_word(dest+j, w+j);
-  }
+  return word << n | (word & (0xffffffff >> (32 - n))) << (32 - n);
 }
 
 static inline void
-sy_rshift_word(uint8_t *dest, const uint8_t *src, size_t n)
-{
-  sy_set_word_value(dest, sy_word_value(src) >> n);
-}
-
-static inline void
-sy_rotl_word(uint8_t *dest, const uint8_t *src, size_t n)
-{
-  uint32_t vsrc;
-
-  vsrc = sy_word_value(src);
-  vsrc = vsrc << n | (vsrc & (0xffffffff << (32 - n))) >> (32 - n);
-  sy_set_word_value(dest, vsrc);
-}
-
-static inline void
-sy_rotr_word(uint8_t *dest, const uint8_t *src, size_t n)
-{
-  uint32_t vsrc;
-
-  vsrc = sy_word_value(src);
-  vsrc = vsrc >> n | (vsrc & (0xffffffff >> (32 - n))) << (32 - n);
-  sy_set_word_value(dest, vsrc);
-}
-
-static inline void
-sy_add_word(uint8_t *dest, const uint8_t *w1, const uint8_t *w2)
-{
-  sy_set_word_value(dest, sy_word_value(w1) + sy_word_value(w2));
-}
-
-static inline void
-sy_copy_words(uint8_t *dest, const uint8_t *src, size_t len)
+sy_copy_words(sy_word *dest, const sy_word *src, size_t len)
 {
   sy_memmove(dest, src, len*4);
 }
 
-/* Copy a word. This function is faster than sy_copy_words(). */
-static inline void
-sy_copy_word(uint8_t *dest, const uint8_t *src)
+static inline sy_word *
+sy_memset_words(sy_word *words, uint8_t v, size_t len)
 {
-  if (src < dest && dest < src + 4) {
-    dest[3] = src[3];
-    dest[2] = src[2];
-    dest[1] = src[1];
-    dest[0] = src[0];
-  } else {
-    dest[0] = src[0];
-    dest[1] = src[1];
-    dest[2] = src[2];
-    dest[3] = src[3];
+  size_t i;
+  sy_word vw;
+
+  vw = v << 24 | v << 16 | v << 8 | v;
+  for (i = 0; i < len - 4; i += 4)
+    words[i/4] = vw;
+
+  if (i < len) {
+    words[i/4] = (words[i/4] & 0x00ffffff) | v << 24;
+    if (++i < len) {
+      words[i/4] = (words[i/4] & 0xff00ffff) | v << 16;
+      if (++i < len) {
+        words[i/4] = (words[i/4] & 0xffff00ff) | v << 8;
+        if (++i < len)
+          words[i/4] = (words[i/4] & 0xffffff00) | v << 8;
+      }
+    }
   }
+  return words;
 }
 
-static inline void
-sy_memzero_word(uint8_t *bytes)
+static inline sy_word *
+sy_memzero_words(sy_word *words, size_t len)
 {
-  volatile uint8_t *vbytes;
-
-  vbytes = (volatile uint8_t *)bytes;
-  vbytes[0] = 0;
-  vbytes[1] = 0;
-  vbytes[2] = 0;
-  vbytes[3] = 0;
+  return sy_memset_words(words, len, 0);
 }
 
 #ifdef __cplusplus
