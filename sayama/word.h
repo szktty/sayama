@@ -71,10 +71,10 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
   if (len >= 4) {
     for (i = 0; i + 3 < len; i += 4) {
       w = words[i/4];
-      bytes[i] = (w >> 24) & 0xff;
-      bytes[i+1] = (w >> 16) & 0xff;
-      bytes[i+2] = (w >> 8) & 0xff;
-      bytes[i+3] = w & 0xff;
+      bytes[i] = (w >> 24) & 0xffU;
+      bytes[i+1] = (w >> 16) & 0xffU;
+      bytes[i+2] = (w >> 8) & 0xffU;
+      bytes[i+3] = w & 0xffU;
     }
   }
 
@@ -83,13 +83,13 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
     break;
 
   case 3:
-    bytes[len/4*4+2] = (words[len/4] >> 8) & 0xff;
+    bytes[len/4*4+2] = (words[len/4] >> 8) & 0xffU;
 
   case 2:
-    bytes[len/4*4+1] = (words[len/4] >> 16) & 0xff;
+    bytes[len/4*4+1] = (words[len/4] >> 16) & 0xffU;
 
   case 1:
-    bytes[len/4*4] = (words[len/4] >> 24) & 0xff;
+    bytes[len/4*4] = (words[len/4] >> 24) & 0xffU;
     break;
   }
 }
@@ -102,7 +102,7 @@ sy_equal_words(const sy_word *words1, const sy_word *words2, size_t len)
 
   for (i = 0; i < len; i++) {
     n = (3-i % 4) * 8;
-    if (((words1[i/4] >> n) & 0xff) != ((words2[i/4] >> n) & 0xff))
+    if (((words1[i/4] >> n) & 0xffU) != ((words2[i/4] >> n) & 0xffU))
       return false;
   }
   return true;
@@ -111,13 +111,13 @@ sy_equal_words(const sy_word *words1, const sy_word *words2, size_t len)
 static inline sy_word
 sy_rotl_word(sy_word word, size_t n)
 {
-  return word << n | (word & (0xffffffff << (32 - n))) >> (32 - n);
+  return word << n | (word & (0xffffffffU << (32 - n))) >> (32 - n);
 }
 
 static inline sy_word
 sy_rotr_word(sy_word word, size_t n)
 {
-  return word >> n | (word & (0xffffffff >> (32 - n))) << (32 - n);
+  return word >> n | (word & (0xffffffffU >> (32 - n))) << (32 - n);
 }
 
 static inline void
@@ -131,15 +131,15 @@ sy_copy_words(sy_word *dest, const sy_word *src, size_t len)
     break;
 
   case 1:
-    dest[len/4] = (dest[len/4] & 0x00ffffff) | (src[len/4] & 0xff000000);
+    dest[len/4] = (dest[len/4] & 0x00ffffffU) | (src[len/4] & 0xff000000U);
     break;
 
   case 2:
-    dest[len/4] = (dest[len/4] & 0x0000ffff) | (src[len/4] & 0xffff0000);
+    dest[len/4] = (dest[len/4] & 0x0000ffffU) | (src[len/4] & 0xffff0000U);
     break;
 
   case 3:
-    dest[len/4] = (dest[len/4] & 0x000000ff) | (src[len/4] & 0xffffff00);
+    dest[len/4] = (dest[len/4] & 0x000000ffU) | (src[len/4] & 0xffffff00U);
     break;
   }
 }
