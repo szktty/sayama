@@ -22,8 +22,11 @@ static inline sy_word sy_rotl_word(sy_word word, size_t n);
 static inline sy_word sy_rotr_word(sy_word word, size_t n);
 static inline void sy_copy_words(sy_word *dest, const sy_word *src,
     size_t len);
-static inline sy_word *sy_memset_words(sy_word *words, uint8_t v, size_t len);
-static inline sy_word *sy_memzero_words(sy_word *words, size_t len);
+static inline void sy_clear_words(sy_word *words,
+    size_t from, size_t to);
+
+extern void sy_fill_words(sy_word *words, uint8_t v,
+    size_t from, size_t to);
 
 static inline void
 sy_encode_words(sy_word *words, const uint8_t *bytes,
@@ -141,37 +144,10 @@ sy_copy_words(sy_word *dest, const sy_word *src, size_t len)
   }
 }
 
-static inline sy_word *
-sy_memset_words(sy_word *words, uint8_t v, size_t len)
+static inline void
+sy_clear_words(sy_word *words, size_t from, size_t to)
 {
-  size_t i;
-  sy_word vw;
-
-  i = 0;
-  if (len >= 4) {
-    vw = v << 24 | v << 16 | v << 8 | v;
-    for (i = 0; i < len - 4; i += 4)
-      words[i/4] = vw;
-  }
-
-  if (i < len) {
-    words[i/4] = (words[i/4] & 0x00ffffff) | v << 24;
-    if (++i < len) {
-      words[i/4] = (words[i/4] & 0xff00ffff) | v << 16;
-      if (++i < len) {
-        words[i/4] = (words[i/4] & 0xffff00ff) | v << 8;
-        if (++i < len)
-          words[i/4] = (words[i/4] & 0xffffff00) | v << 8;
-      }
-    }
-  }
-  return words;
-}
-
-static inline sy_word *
-sy_memzero_words(sy_word *words, size_t len)
-{
-  return sy_memset_words(words, 0, len);
+  return sy_fill_words(words, 0, from, to);
 }
 
 #ifdef __cplusplus

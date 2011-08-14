@@ -2,8 +2,8 @@
 
 CFLAGS += -O2 -finline-functions -fomit-frame-pointer -fno-strict-aliasing --param max-inline-insns-single=1800 --param inline-unit-growth=500 --param large-function-growth=900 -Wmissing-prototypes -Wall -std=c99
 
-#OBJS = aes digest hmac sha memory utils
-OBJS = memory utils
+#OBJS = aes digest hmac sha memory utils word
+OBJS = memory utils word
 LIB_NAME = libsayama
 LIB = $(StaticCLibrary $(LIB_NAME), $(OBJS))
 DYLIB = $(DynamicCLibrary $(LIB_NAME), $(OBJS))
