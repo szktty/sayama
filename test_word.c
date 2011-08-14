@@ -308,8 +308,9 @@ test_fill_words3()
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0; e[1] = 0x00ffffff;;
+  e[0] = 0; e[1] = 0x00ffffff;
   sy_fill_words(a, 0, 0, 4);
+  printf("%08x %08x \n", a[0], a[1]);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
