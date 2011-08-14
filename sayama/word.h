@@ -171,7 +171,7 @@ sy_memset_words(sy_word *words, uint8_t v, size_t len)
 static inline sy_word *
 sy_memzero_words(sy_word *words, size_t len)
 {
-  return sy_memset_words(words, len, 0);
+  return sy_memset_words(words, 0, len);
 }
 
 #ifdef __cplusplus

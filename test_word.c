@@ -8,10 +8,8 @@ void test_equal_words(void);
 void test_rotl_word(void);
 void test_rotr_word(void);
 void test_copy_words(void);
-/*
 void test_memset_words(void);
 void test_memzero_words(void);
-*/
 
 void
 test_encode_words()
@@ -197,5 +195,123 @@ test_copy_words()
   e[0] = 0x12ffffff;
   sy_copy_words(a, w, 1);
   cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+}
+
+void
+test_memset_words()
+{
+  sy_word a[2], e[2];
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0;
+  sy_memset_words(a, 0, 8);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x000000ff;;
+  sy_memset_words(a, 0, 7);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x0000ffff;;
+  sy_memset_words(a, 0, 6);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x00ffffff;;
+  sy_memset_words(a, 0, 5);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0xffffffff;
+  sy_memset_words(a, 0, 4);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x000000ff;
+  sy_memset_words(a, 0, 3);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x0000ffff;;
+  sy_memset_words(a, 0, 2);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x00ffffff;
+  sy_memset_words(a, 0, 1);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+}
+
+void
+test_memzero_words()
+{
+  sy_word a[2], e[2];
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0;
+  sy_memzero_words(a, 8);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x000000ff;;
+  sy_memzero_words(a, 7);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x0000ffff;;
+  sy_memzero_words(a, 6);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0x00ffffff;;
+  sy_memzero_words(a, 5);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0;
+  e[1] = 0xffffffff;
+  sy_memzero_words(a, 4);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x000000ff;
+  sy_memzero_words(a, 3);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x0000ffff;;
+  sy_memzero_words(a, 2);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff;
+  a[1] = 0xffffffff;
+  e[0] = 0x00ffffff;
+  sy_memzero_words(a, 1);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
