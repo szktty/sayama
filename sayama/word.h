@@ -15,7 +15,7 @@ typedef uint32_t sy_word;
 static inline void sy_encode_words(sy_word *words, const uint8_t *bytes,
     size_t len, uint8_t padding);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
-    size_t len);
+    size_t from, size_t to);
 static inline bool sy_equal_words(const sy_word *words1, size_t from1,
     const sy_word *words2, size_t from2, size_t len);
 static inline sy_word sy_rotl_word(sy_word word, size_t n);
@@ -68,35 +68,13 @@ sy_encode_words(sy_word *words, const uint8_t *bytes,
 }
 
 static inline void
-sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
+sy_decode_words(uint8_t *bytes, const sy_word *words,
+    size_t from, size_t to)
 {
-  sy_word w;
   size_t i;
 
-  if (len >= 4) {
-    for (i = 0; i + 3 < len; i += 4) {
-      w = words[i/4];
-      bytes[i] = (w >> 24) & 0xffU;
-      bytes[i+1] = (w >> 16) & 0xffU;
-      bytes[i+2] = (w >> 8) & 0xffU;
-      bytes[i+3] = w & 0xffU;
-    }
-  }
-
-  switch (len % 4) {
-  case 0:
-    break;
-
-  case 3:
-    bytes[len/4*4+2] = (words[len/4] >> 8) & 0xffU;
-
-  case 2:
-    bytes[len/4*4+1] = (words[len/4] >> 16) & 0xffU;
-
-  case 1:
-    bytes[len/4*4] = (words[len/4] >> 24) & 0xffU;
-    break;
-  }
+  for (i = from; i <= to; i++)
+    bytes[i] = sy_word_get(words, i);
 }
 
 static inline bool
