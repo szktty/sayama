@@ -16,8 +16,8 @@ static inline void sy_encode_words(sy_word *words, const uint8_t *bytes,
     size_t len, uint8_t padding);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
     size_t len);
-static inline bool sy_equal_words(const sy_word *words1,
-    const sy_word *words2, size_t len);
+static inline bool sy_equal_words(const sy_word *words1, size_t from1,
+    const sy_word *words2, size_t from2, size_t len);
 static inline sy_word sy_rotl_word(sy_word word, size_t n);
 static inline sy_word sy_rotr_word(sy_word word, size_t n);
 static inline void sy_copy_words(sy_word *dest, const sy_word *src,
@@ -100,12 +100,13 @@ sy_decode_words(uint8_t *bytes, const sy_word *words, size_t len)
 }
 
 static inline bool
-sy_equal_words(const sy_word *words1, const sy_word *words2, size_t len)
+sy_equal_words(const sy_word *words1, size_t from1,
+    const sy_word *words2, size_t from2, size_t len)
 {
   size_t i;
 
   for (i = 0; i < len; i++) {
-    if (sy_word_get(words1, i) != sy_word_get(words2, i))
+    if (sy_word_get(words1, from1 + i) != sy_word_get(words2, from2 + i))
       return false;
   }
   return true;

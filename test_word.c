@@ -107,24 +107,24 @@ test_equal_words()
   ws1[1] = 0x12345678;
   ws2[0] = 0x12345678;
   ws2[1] = 0x12345678;
-  cut_assert_true(sy_equal_words(ws1, ws2, 8), cut_message("fail 1"));
+  cut_assert_true(sy_equal_words(ws1, 0, ws2, 0, 8), cut_message("fail 1"));
 
   ws1[0] = 0x00000000;
-  cut_assert_false(sy_equal_words(ws1, ws2, 8), cut_message("fail 2"));
+  cut_assert_false(sy_equal_words(ws1, 0, ws2, 0, 8), cut_message("fail 2"));
   ws1[0] = 0x12345678;
 
   ws1[1] = 0x00000000;
-  cut_assert_true(sy_equal_words(ws1, ws2, 4), cut_message("fail 3"));
-  cut_assert_false(sy_equal_words(ws1, ws2, 8), cut_message("fail 4"));
+  cut_assert_true(sy_equal_words(ws1, 0, ws2, 0, 4), cut_message("fail 3"));
+  cut_assert_false(sy_equal_words(ws1, 0, ws2, 0, 8), cut_message("fail 4"));
   ws1[1] = 0x12345678;
 
   ws2[0] = 0x00000000;
-  cut_assert_false(sy_equal_words(ws1, ws2, 8), cut_message("fail 5"));
+  cut_assert_false(sy_equal_words(ws1, 0, ws2, 0, 8), cut_message("fail 5"));
   ws2[0] = 0x12345678;
 
   ws2[1] = 0x00000000;
-  cut_assert_true(sy_equal_words(ws1, ws2, 4), cut_message("fail 6"));
-  cut_assert_false(sy_equal_words(ws1, ws2, 8), cut_message("fail 7"));
+  cut_assert_true(sy_equal_words(ws1, 0, ws2, 0, 4), cut_message("fail 6"));
+  cut_assert_false(sy_equal_words(ws1, 0, ws2, 0, 8), cut_message("fail 7"));
 }
 
 void
@@ -274,17 +274,17 @@ test_fill_words2()
   a[0] = 0xffffffff; a[1] = 0xffffffff; a[2] = 0xffffffff;
   e[0] = 0xffffffff; e[1] = 0x00ffffff; e[2] = 0xffffffff;
   sy_fill_words(a, 0, 4, 4);
-  cut_assert(sy_equal_words(e, a, 12), cut_message("unexpected word"));
+  cut_assert(sy_equal_words(e, 0, a, 0, 12), cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff; a[2] = 0xffffffff;
   e[0] = 0xffffffff; e[1] = 0xff000000; e[2] = 0xffffffff;
   sy_fill_words(a, 0, 5, 7);
-  cut_assert(sy_equal_words(e, a, 12), cut_message("unexpected word"));
+  cut_assert(sy_equal_words(e, 0, a, 0, 12), cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff; a[2] = 0xffffffff;
   e[0] = 0xffffffff; e[1] = 0xffff0000; e[2] = 0x00ffffff;
   sy_fill_words(a, 0, 6, 8);
-  cut_assert(sy_equal_words(e, a, 12), cut_message("unexpected word"));
+  cut_assert(sy_equal_words(e, 0, a, 0, 12), cut_message("unexpected word"));
 }
 
 void
