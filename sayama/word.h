@@ -12,8 +12,8 @@ extern "C"
 
 typedef uint32_t sy_word;
 
-static inline void sy_encode_words(sy_word *words, const uint8_t *bytes,
-    size_t len, uint8_t padding);
+static inline void sy_encode_words(sy_word *words, size_t from,
+    const uint8_t *bytes, size_t len);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
     size_t from, size_t to);
 static inline bool sy_equal_words(const sy_word *words1, size_t from1,
@@ -34,37 +34,13 @@ extern void sy_fill_words(sy_word *words, uint8_t v,
 #define SY_WORD_BYTE_MASK(i)    (0xffU << SY_WORD_BYTE_SHIFT(i))
 
 static inline void
-sy_encode_words(sy_word *words, const uint8_t *bytes,
-    size_t len, uint8_t padding)
+sy_encode_words(sy_word *words, size_t from, const uint8_t *bytes,
+    size_t len)
 {
   size_t i;
 
-  if (len >= 4) {
-    for (i = 0; i + 3 < len; i += 4) {
-      words[i/4] = bytes[i] << 24 | bytes[i+1] << 16 |
-        bytes[i+2] << 8 | bytes[i+3];
-    }
-  }
-
-  switch (len % 4) {
-  case 0:
-    break;
-
-  case 1:
-    words[len/4] = bytes[len/4*4] << 24 | padding << 16 |
-      padding << 8 | padding;
-    break;
-
-  case 2:
-    words[len/4] = bytes[len/4*4] << 24 | bytes[len/4*4+1] << 16 |
-      padding << 8 | padding;
-    break;
-
-  case 3:
-    words[len/4] = bytes[len/4*4] << 24 | bytes[len/4*4+1] << 16 |
-      bytes[len/4*4+2] << 8 | padding;
-    break;
-  }
+  for (i = 0; i < len; i++)
+    sy_word_set(words, from + i, bytes[i]);
 }
 
 static inline void

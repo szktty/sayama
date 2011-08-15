@@ -20,35 +20,43 @@ test_encode_words()
   uint8_t w[] = { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0 };
   sy_word a[2], e[] = {0x12345678, 0x9abcdef0};
 
-  sy_encode_words(a, w, 8, 0xff);
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  sy_encode_words(a, 0, w, 8);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[1] = 0x9abcdeff;
-  sy_encode_words(a, w, 7, 0xff);
+  sy_encode_words(a, 0, w, 7);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[1] = 0x9abcffff;
-  sy_encode_words(a, w, 6, 0xff);
+  sy_encode_words(a, 0, w, 6);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[1] = 0x9affffff;
-  sy_encode_words(a, w, 5, 0xff);
+  sy_encode_words(a, 0, w, 5);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0x12345678;
-  sy_encode_words(a, w, 4, 0xff);
+  sy_encode_words(a, 0, w, 4);
   cut_assert(e[0] == a[0], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0x123456ff;
-  sy_encode_words(a, w, 3, 0xff);
+  sy_encode_words(a, 0, w, 3);
   cut_assert(e[0] == a[0], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0x1234ffff;
-  sy_encode_words(a, w, 2, 0xff);
+  sy_encode_words(a, 0, w, 2);
   cut_assert(e[0] == a[0], cut_message("unexpected word"));
 
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0x12ffffff;
-  sy_encode_words(a, w, 1, 0xff);
+  sy_encode_words(a, 0, w, 1);
   cut_assert(e[0] == a[0], cut_message("unexpected word"));
 }
 
