@@ -26,10 +26,8 @@ sy_fill_words(sy_word *words, uint8_t v, size_t from, size_t to)
       }
     }
   } else {
-    for (i = from; i <= to; i++) {
-      words[i/4] = (words[i/4] & ~(0xffU << ((3-i%4)*8))) |
-        (v << ((3-i%4)*8));
-    }
+    for (i = from; i <= to; i++)
+      sy_word_set(words, i, v);
   }
 }
 
