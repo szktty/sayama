@@ -50,7 +50,7 @@ sy_decode_words(uint8_t *bytes, const sy_word *words,
   size_t i;
 
   for (i = from; i <= to; i++)
-    bytes[i] = sy_word_get(words, i);
+    bytes[i-from] = sy_word_get(words, i);
 }
 
 static inline bool
