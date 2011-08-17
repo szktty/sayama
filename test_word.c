@@ -58,6 +58,26 @@ test_encode_words()
   e[0] = 0x12ffffff;
   sy_encode_words(a, 0, w, 1);
   cut_assert(e[0] == a[0], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0xffffff12; e[1] = 0x3456ffff;
+  sy_encode_words(a, 3, w, 3);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0xffffffff; e[1] = 0xff123456;
+  sy_encode_words(a, 5, w, 3);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0xff123456; e[1] = 0x789affff;
+  sy_encode_words(a, 1, w, 5);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0xff1234ff; e[1] = 0xffffffff;
+  sy_encode_words(a, 1, w, 2);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
 void
@@ -100,9 +120,30 @@ test_decode_words()
   sy_decode_words(a, w, 0, 1);
   cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
 
-  memset(a, 0xff, 8);
-  e[1] = 0xff;
+  memset(a, 0xff, 8); memset(e, 0xff, 8);
+  e[0] = 0x12;
   sy_decode_words(a, w, 0, 0);
+  cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
+
+  memset(a, 0xff, 8); memset(e, 0xff, 8);
+  e[0] = 0x34; e[1] = 0x56; e[2] = 0x78;
+  sy_decode_words(a, w, 1, 3);
+  cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
+
+  memset(a, 0xff, 8); memset(e, 0xff, 8);
+  e[0] = 0x34; e[1] = 0x56; e[2] = 0x78; e[3] = 0x9a; e[4] = 0xbc;
+  sy_decode_words(a, w, 1, 5);
+  cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
+
+  memset(a, 0xff, 8); memset(e, 0xff, 8);
+  e[0] = 0x34; e[1] = 0x56; e[2] = 0x78; e[3] = 0x9a; e[4] = 0xbc;
+  e[5] = 0xde; e[6] = 0xf0;
+  sy_decode_words(a, w, 1, 7);
+  cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
+
+  memset(a, 0xff, 8); memset(e, 0xff, 8);
+  e[0] = 0xbc; e[1] = 0xde; e[2] = 0xf0;
+  sy_decode_words(a, w, 5, 7);
   cut_assert_equal_bytes(e, a, 8, cut_message("unexpected word"));
 }
 
