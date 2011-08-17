@@ -21,7 +21,7 @@ static inline bool sy_equal_words(const sy_word *words1, size_t from1,
 static inline sy_word sy_rotl_word(sy_word word, size_t n);
 static inline sy_word sy_rotr_word(sy_word word, size_t n);
 static inline void sy_copy_words(sy_word *dest, size_t from_dest,
-    const sy_word *src, size_t from_src, size_t len);
+    const sy_word *src, size_t from_src, size_t to_src);
 static inline void sy_clear_words(sy_word *words,
     size_t from, size_t to);
 static inline uint8_t sy_word_get(const sy_word *words, size_t i);
@@ -80,12 +80,12 @@ sy_rotr_word(sy_word word, size_t n)
 
 static inline void
 sy_copy_words(sy_word *dest, size_t from_dest,
-    const sy_word *src, size_t from_src, size_t len)
+    const sy_word *src, size_t from_src, size_t to_src)
 {
   size_t i;
 
-  for (i = 0; i < len; i++)
-    sy_word_set(dest, from_dest + i, sy_word_get(src, from_src + i));
+  for (i = from_src; i <= to_src; i++)
+    sy_word_set(dest, from_dest + i - from_src, sy_word_get(src, i));
 }
 
 static inline void

@@ -218,62 +218,62 @@ test_copy_words()
   sy_word a[2], e[] = {0x12345678, 0x9abcdef0};
   sy_word w[] = {0x12345678, 0x9abcdef0};
 
-  sy_copy_words(a, 0, w, 0, 8);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[1] = 0xffffffff;
-  e[1] = 0x9abcdeff;
   sy_copy_words(a, 0, w, 0, 7);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[1] = 0xffffffff;
-  e[1] = 0x9abcffff;
+  e[1] = 0x9abcdeff;
   sy_copy_words(a, 0, w, 0, 6);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[1] = 0xffffffff;
-  e[1] = 0x9affffff;
+  e[1] = 0x9abcffff;
   sy_copy_words(a, 0, w, 0, 5);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0x12345678; e[1] = 0x9abcdef0;
+  a[1] = 0xffffffff;
+  e[1] = 0x9affffff;
   sy_copy_words(a, 0, w, 0, 4);
-  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
-  a[0] = 0xffffffff;
-  e[0] = 0x123456ff;
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0x12345678; e[1] = 0xffffffff;
   sy_copy_words(a, 0, w, 0, 3);
-  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+
+  a[0] = 0xffffffff; a[1] = 0xffffffff;
+  e[0] = 0x123456ff; e[1] = 0xffffffff;
+  sy_copy_words(a, 0, w, 0, 2);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff;
   e[0] = 0x1234ffff;
-  sy_copy_words(a, 0, w, 0, 2);
-  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+  sy_copy_words(a, 0, w, 0, 1);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff;
   e[0] = 0x12ffffff;
-  sy_copy_words(a, 0, w, 0, 1);
-  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
+  sy_copy_words(a, 0, w, 0, 0);
+  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0xff1234ff; e[1] = 0xffffffff;
-  sy_copy_words(a, 1, w, 0, 2);
+  sy_copy_words(a, 1, w, 0, 1);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0xff123456; e[1] = 0x78ffffff;
-  sy_copy_words(a, 1, w, 0, 4);
+  sy_copy_words(a, 1, w, 0, 3);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0xffffff56; e[1] = 0x78ffffff;
-  sy_copy_words(a, 3, w, 2, 2);
+  sy_copy_words(a, 3, w, 2, 3);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
   e[0] = 0xffffffff; e[1] = 0xff5678ff;
-  sy_copy_words(a, 5, w, 2, 2);
+  sy_copy_words(a, 5, w, 2, 3);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
