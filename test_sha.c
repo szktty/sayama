@@ -85,50 +85,30 @@ void
 test_sha1_f()
 {
   unsigned int t;
-  uint8_t ac[4], ex[4], b[4], c[4], d[4];
+  sy_word ac; 
 
   /* t < 20 */
-  t = 3;
-  sy_set_word_value(b, 0x5d43e370);
-  sy_set_word_value(c, 0xc7ed262c);
-  sy_set_word_value(d, 0x59d148c0);
-  sy_set_word_value(ex, 0x45d12aa0);
-  _sy_sha1_f(ac, t, b, c, d);
-  cut_assert_equal_bytes(ex, ac, 4, cut_message("t = %u failed", t));
+  cut_assert(0x45d12aa0 ==
+      _sy_sha1_f(3, 0x5d43e370, 0xc7ed262c, 0x59d148c0));
 
   /* 20 <= t && t < 40 */
-  t = 37;
-  sy_set_word_value(b, 0xabbab988);
-  sy_set_word_value(c, 0x0e47bc31);
-  sy_set_word_value(d, 0x92c4d1f8);
-  sy_set_word_value(ex, 0x3739d441);
-  _sy_sha1_f(ac, t, b, c, d);
-  cut_assert_equal_bytes(ex, ac, 4, cut_message("t = %u failed", t));
+  cut_assert(0x3739d441 ==
+      _sy_sha1_f(37, 0xabbab988, 0x0e47bc31, 0x92c4d1f8));
 
   /* 40 <= t && t < 60 */
-  t = 45;
-  sy_set_word_value(b, 0x291f2d96);
-  sy_set_word_value(c, 0x85275613);
-  sy_set_word_value(d, 0x8b9e38d1);
-  sy_set_word_value(ex, 0x891f3c93);
-  _sy_sha1_f(ac, t, b, c, d);
-  cut_assert_equal_bytes(ex, ac, 4, cut_message("t = %u failed", t));
+  cut_assert(0x891f3c93 ==
+      _sy_sha1_f(45, 0x291f2d96, 0x85275613, 0x8b9e38d1));
 
   /* 60 <= t && t <= 80 */
-  t = 73;
-  sy_set_word_value(b, 0xf10f8b24);
-  sy_set_word_value(c, 0xa3dd0263);
-  sy_set_word_value(d, 0xa7200b4f);
-  sy_set_word_value(ex, 0xf5f28208);
-  _sy_sha1_f(ac, t, b, c, d);
-  cut_assert_equal_bytes(ex, ac, 4, cut_message("t = %u failed", t));
+  cut_assert(0xf5f28208 ==
+      _sy_sha1_f(73, 0xf10f8b24, 0xa3dd0263, 0xa7200b4f));
 }
 
 void
 test_sha1_hash_block()
 {
-  uint8_t block[] = {0x33, 0x61, 0x58, 0x7f, 0xa3, 0x6f, 0x83, 0xae,
-    0x9c, 0x55, 0x91, 0x16, 0x1f, 0x66, 0xf2, 0xab, 0x8d, 0xfa, 0x55, 0x54};
+  sy_word block[] = {0x3361587f, 0xa36f83ae, 0x9c559116,
+    0x1f66f2ab, 0x8dfa5554};
   uint8_t data[] = {0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
     0x37, 0x37, 0x37, 0x37, 0x37, 0x37, 0x37, 0x37, 0x37, 0x37,
     0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38,
@@ -136,28 +116,19 @@ test_sha1_hash_block()
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20};
-  uint8_t ex[] = {0x9f, 0xbf, 0xcf, 0xf0, 0xa3, 0xa7, 0x15, 0x55,
-    0xdc, 0xa8, 0x9b, 0x81, 0x3a, 0x2d, 0xb3, 0xfe, 0x1e, 0x83, 0x95, 0xf4};
+  sy_word ex[] = {0x9fbfcff0, 0xa3a71555,
+    0xdca89b81, 0x3a2db3fe, 0x1e8395f4};
 
   _sy_sha1_hash_block(block, data);
-  cut_assert_equal_bytes(ex, block, 20,
+  cut_assert(sy_equal_words(ex, 0, block, 0, 20),
       cut_message("unexpected hashed block"));
 }
 
 void
 test_sha256_sigma0(void)
 {
-  uint8_t e[4], a[4], w[4];
-
-  sy_set_word_value(w, 0x12345678);
-  sy_set_word_value(e, 0xe7fce6ee);
-  _sy_sha256_sigma0(a, w);
-  cut_assert_equal_bytes(e, a, 4, cut_message("1: unexpected value"));
-
-  sy_set_word_value(w, 0x13579bdf);
-  sy_set_word_value(e, 0x5abb9899);
-  _sy_sha256_sigma0(a, w);
-  cut_assert_equal_bytes(e, a, 4, cut_message("2: unexpected value"));
+  cut_assert_equal_word(0xe7fce6ee, _sy_sha256_sigma0(0x12345678));
+  cut_assert_equal_word(0x5abb989, _sy_sha256_sigma0(0x13579bdf));
 }
 
 void

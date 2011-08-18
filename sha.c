@@ -5,18 +5,15 @@
 #include "sha.h"
 
 static void sha1_update(uint8_t *buf, size_t len, sy_sha1_context *context);
-static inline void sha1_hash_block(uint8_t *state, const uint8_t *block);
-static inline void sha1_f(uint8_t *dest, unsigned int t,
-    const uint8_t *b, const uint8_t *c, const uint8_t *d);
+static inline void sha1_hash_block(sy_word *state, const uint8_t *block);
+static inline sy_word sha1_f(unsigned int t, sy_word b, sy_word c, sy_word d);
 
-static inline void sha256_sigma0(uint8_t *buf, const uint8_t *w);
-static inline void sha256_sigma1(uint8_t *buf, const uint8_t *w);
-static inline void sha256_ch(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3);
-static inline void sha256_maj(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3);
-static inline void sha256_sum0(uint8_t *buf, const uint8_t *w);
-static inline void sha256_sum1(uint8_t *buf, const uint8_t *w);
+static inline sy_word sha256_sigma0(sy_word w);
+static inline sy_word sha256_sigma1(sy_word w);
+static inline sy_word sha256_ch(sy_word w1, sy_word w2, sy_word w3);
+static inline sy_word sha256_maj(sy_word w1, sy_word w2, sy_word w3);
+static inline sy_word sha256_sum0(sy_word w);
+static inline sy_word sha256_sum1(sy_word w);
 static void sha256_update(uint8_t *block, size_t len,
     sy_sha256_context *context);
 static inline void sha256_hash_block(uint8_t *state, const uint8_t *block);
@@ -59,11 +56,11 @@ sy_sha1(uint8_t *buf, const uint8_t *data, size_t len)
 void
 sy_sha1_init(sy_sha1_context *context)
 {
-  static uint8_t init[] = { 0x67, 0x45, 0x23, 0x01, 0xef, 0xcd, 0xab,
-    0x89, 0x98, 0xba, 0xdc, 0xfe, 0x10, 0x32, 0x54, 0x76, 0xc3, 0xd2,
-    0xe1, 0xf0 };
-
-  sy_memmove(context->state, init, SY_SHA1_STATE_LEN);
+  context->state[0] = 0x67452301U;
+  context->state[1] = 0xefcdab89U;
+  context->state[2] = 0x98badcfeU;
+  context->state[3] = 0x10325476U;
+  context->state[4] = 0xc3d2e1f0U;
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
   context->buf_len = 0;
   context->total_len = 0;
@@ -113,139 +110,99 @@ sha1_update(uint8_t *block, size_t len, sy_sha1_context *context)
 }
 
 static inline void
-sha1_hash_block(uint8_t *block, const uint8_t *data)
+sha1_hash_block(sy_word *block, const uint8_t *data)
 {
-  uint8_t w[80*4], tmp1[4], tmp2[4], a[4], b[4], c[4], d[4], e[4];
+  volatile sy_word w[80], a, b, c, d, e, tmp;
   unsigned int t;
 
-  sy_copy_words(w, data, 16*4);
-  for (t = 16; t < 80; t++) {
-    sy_lxor_word(tmp1, W(w, t-3), W(w, t-8));
-    sy_lxor_word(tmp1, tmp1, W(w, t-14));
-    sy_lxor_word(tmp1, tmp1, W(w, t-16));
-    sy_rotl_word(W(w, t), tmp1, 1);
-  }
+  sy_encode_words(w, 0, data, 16*4);
+  for (t = 16; t < 80; t++)
+    w[t] = sy_rotl_word(w[t-3] ^ w[t-8] ^ w[t-14] ^ w[t-16], 1);
 
-  sy_copy_word(a, block);
-  sy_copy_word(b, W(block, 1));
-  sy_copy_word(c, W(block, 2));
-  sy_copy_word(d, W(block, 3));
-  sy_copy_word(e, W(block, 4));
+  a = block[0];
+  b = block[1];
+  c = block[2];
+  d = block[3];
+  e = block[4];
 
   for (t = 0; t < 80; t++) {
-    sy_rotl_word(tmp1, a, 5);
-    sha1_f(tmp2, t, b, c, d);
-    sy_add_word(tmp1, tmp1, tmp2);
-    sy_add_word(tmp1, tmp1, e);
-    sy_add_word(tmp1, tmp1, W(w, t));
-    sy_add_word(tmp1, tmp1, sha1_K[t/20]);
-    sy_copy_word(e, d);
-    sy_copy_word(d, c);
-    sy_rotl_word(c, b, 30);
-    sy_copy_word(b, a);
-    sy_copy_word(a, tmp1);
+    tmp = sy_rotl_word(a, 5) + sha1_f(t, b, c, d) + e + w[t] + sha1_K[t/20];
+    e = d;
+    d = c;
+    c = sy_rotl_word(b, 30);
+    b = a;
+    a = tmp;
   }
 
-  sy_add_word(block, block, a);
-  sy_add_word(W(block, 1), W(block, 1), b);
-  sy_add_word(W(block, 2), W(block, 2), c);
-  sy_add_word(W(block, 3), W(block, 3), d);
-  sy_add_word(W(block, 4), W(block, 4), e);
+  block[0] += a;
+  block[1] += b;
+  block[2] += c;
+  block[3] += d;
+  block[4] += e;
 
   sy_memzero(w, 80*4);
-  sy_memzero_word(tmp1);
-  sy_memzero_word(tmp2);
-  sy_memzero_word(a);
-  sy_memzero_word(b);
-  sy_memzero_word(c);
-  sy_memzero_word(d);
-  sy_memzero_word(e);
+  a = 0;
+  b = 0;
+  c = 0;
+  d = 0;
+  e = 0;
+  tmp = 0;
 }
 
 void
-_sy_sha1_hash_block(uint8_t *block, const uint8_t *data)
+_sy_sha1_hash_block(sy_word *block, const uint8_t *data)
 {
   sha1_hash_block(block, data);
 }
 
-static inline void
-sha1_f(uint8_t *dest, unsigned int t,
-    const uint8_t *b, const uint8_t *c, const uint8_t *d)
+static inline sy_word
+sha1_f(unsigned int t, sy_word b, sy_word c, sy_word d)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  if (t < 20) {
-    /* b & c | ~b & d */
-    sy_land_word(tmp1, b, c);
-    sy_invert_word(tmp2, b);
-    sy_land_word(tmp2, tmp2, d);
-    sy_lor_word(dest, tmp1, tmp2);
-  } else if (40 <= t && t < 60) {
-    /* b & c | b & d | c & d */
-    sy_land_word(tmp1, b, c);
-    sy_land_word(tmp2, b, d);
-    sy_land_word(tmp3, c, d);
-    sy_lor_word(dest, tmp1, tmp2);
-    sy_lor_word(dest, dest, tmp3);
-  } else {
-    /* b ^ c ^ d */
-    sy_lxor_word(dest, b, c);
-    sy_lxor_word(dest, dest, d);
-  }
-
-  sy_memzero_word(tmp1);
-  sy_memzero_word(tmp2);
-  sy_memzero_word(tmp3);
+  if (t < 20)
+    return (b & c) | (~b & d);
+  else if (40 <= t && t < 60)
+    return (b & c) | (b & d) | (c & d);
+  else
+    return b ^ c ^ d;
 }
 
-void
-_sy_sha1_f(uint8_t *dest, unsigned int t,
-    const uint8_t *b, const uint8_t *c, const uint8_t *d)
+sy_word
+_sy_sha1_f(unsigned int t, sy_word b, sy_word c, sy_word d)
 {
-  sha1_f(dest, t, b, c, d);
+  return sha1_f(t, b, c, d);
 }
 
 void
 sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
 {
   sha1_update(context->buf, context->buf_len, context);
-  sy_memmove(dest, context->state, SY_SHA1_STATE_LEN);
-  sy_memzero(context->state, SY_SHA1_STATE_LEN);
+  sy_decode_words(dest, context->state, 0, SY_SHA1_STATE_LEN-1);
+  sy_clear_words(context->state, 0, SY_SHA1_STATE_LEN-1);
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
 }
 
-static inline void
-sha256_sigma0(uint8_t *buf, const uint8_t *w)
+static inline sy_word
+sha256_sigma0(sy_word w)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  sy_rotr_word(tmp1, w, 7);
-  sy_rotr_word(tmp2, w, 18);
-  sy_rshift_word(tmp3, w, 3);
-  sy_lxor_word3(buf, tmp1, tmp2, tmp3);
+  return sy_rotr_word(w, 7) ^ sy_rotr_word(w, 18) ^ (w >> 3);
 }
 
-void
-_sy_sha256_sigma0(uint8_t *buf, const uint8_t *w)
+sy_word
+_sy_sha256_sigma0(sy_word w)
 {
-  sha256_sigma0(buf, w);
+  return sha256_sigma0(w);
 }
 
-static inline void
-sha256_sigma1(uint8_t *buf, const uint8_t *w)
+static inline sy_word
+sha256_sigma1(sy_word w)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  sy_rotr_word(tmp1, w, 17);
-  sy_rotr_word(tmp2, w, 19);
-  sy_rshift_word(tmp3, w, 10);
-  sy_lxor_word3(buf, tmp1, tmp2, tmp3);
+  return sy_rotr_word(w, 17) ^ sy_rotr_word(w, 19) ^ (w >> 10);
 }
 
-void
-_sy_sha256_sigma1(uint8_t *buf, const uint8_t *w)
+sy_word
+_sy_sha256_sigma1(sy_word w)
 {
-  sha256_sigma1(buf, w);
+  return sha256_sigma1(w);
 }
 
 static inline void

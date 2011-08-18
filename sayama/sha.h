@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sayama/word.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -19,14 +20,14 @@ typedef struct sy_sha256_context    sy_sha256_context;
 #define SY_SHA256_BLOCK_LEN     64
 
 struct sy_sha1_context {
-  uint8_t state[SY_SHA1_STATE_LEN];
+  sy_word state[SY_SHA1_STATE_LEN/4];
   uint8_t buf[SY_SHA1_BLOCK_LEN];
   size_t buf_len;
   size_t total_len;
 };
 
 struct sy_sha256_context {
-  uint8_t state[SY_SHA256_STATE_LEN];
+  sy_word state[SY_SHA256_STATE_LEN/4];
   uint8_t buf[SY_SHA256_BLOCK_LEN];
   size_t buf_len;
   size_t total_len;
