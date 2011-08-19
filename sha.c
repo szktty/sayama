@@ -16,16 +16,13 @@ static inline sy_word sha256_sum0(sy_word w);
 static inline sy_word sha256_sum1(sy_word w);
 static void sha256_update(uint8_t *block, size_t len,
     sy_sha256_context *context);
-static inline void sha256_hash_block(uint8_t *state, const uint8_t *block);
+static inline void sha256_hash_block(sy_word *state, const uint8_t *block);
 
-static uint8_t sha1_K[][4] = {
-  {0x5a, 0x82, 0x79, 0x99},
-  {0x6e, 0xd9, 0xeb, 0xa1},
-  {0x8f, 0x1b, 0xbc, 0xdc},
-  {0xca, 0x62, 0xc1, 0xd6}
+static sy_word sha1_K[] = {
+  0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6
 };
 
-static uint32_t sha256_K[] = {
+static sy_word sha256_K[] = {
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
   0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -112,7 +109,8 @@ sha1_update(uint8_t *block, size_t len, sy_sha1_context *context)
 static inline void
 sha1_hash_block(sy_word *block, const uint8_t *data)
 {
-  volatile sy_word w[80], a, b, c, d, e, tmp;
+  volatile sy_word w[80];
+  sy_word a, b, c, d, e, tmp;
   unsigned int t;
 
   sy_encode_words(w, 0, data, 16*4);
@@ -141,12 +139,6 @@ sha1_hash_block(sy_word *block, const uint8_t *data)
   block[4] += e;
 
   sy_memzero(w, 80*4);
-  a = 0;
-  b = 0;
-  c = 0;
-  d = 0;
-  e = 0;
-  tmp = 0;
 }
 
 void
@@ -177,7 +169,7 @@ sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
 {
   sha1_update(context->buf, context->buf_len, context);
   sy_decode_words(dest, context->state, 0, SY_SHA1_STATE_LEN-1);
-  sy_clear_words(context->state, 0, SY_SHA1_STATE_LEN-1);
+  sy_clear_words(context->state, SY_SHA1_STATE_LEN/4);
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
 }
 
@@ -205,76 +197,54 @@ _sy_sha256_sigma1(sy_word w)
   return sha256_sigma1(w);
 }
 
-static inline void
-sha256_ch(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3)
+static inline sy_word
+sha256_ch(sy_word w1, sy_word w2, sy_word w3)
 {
-  uint8_t tmp1[4], tmp2[4];
-
-  sy_land_word(tmp1, w1, w2);
-  sy_invert_word(tmp2, w1);
-  sy_land_word(tmp2, tmp2, w3);
-  sy_lxor_word(buf, tmp1, tmp2);
+  return (w1 & w2) ^ (~w1 & w3);
 }
 
-void
-_sy_sha256_ch(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3)
+sy_word
+_sy_sha256_ch(sy_word w1, sy_word w2, sy_word w3)
 {
-  sha256_ch(buf, w1, w2, w3);
+  return sha256_ch(w1, w2, w3);
 }
 
-static inline void
-sha256_maj(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3)
+static inline sy_word
+sha256_maj(sy_word w1, sy_word w2, sy_word w3)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  sy_land_word(tmp1, w1, w2);
-  sy_land_word(tmp2, w1, w3);
-  sy_land_word(tmp3, w2, w3);
-  sy_lxor_word3(buf, tmp1, tmp2, tmp3);
+  return (w1 & w2) ^ (w1 & w3) ^ (w2 & w3);
 }
 
-void
-_sy_sha256_maj(uint8_t *buf, const uint8_t *w1,
-    const uint8_t *w2, const uint8_t *w3)
+sy_word
+_sy_sha256_maj(sy_word w1, sy_word w2, sy_word w3)
 {
-  sha256_maj(buf, w1, w2, w3);
+  return sha256_maj(w1, w2, w3);
 }
 
-static inline void
-sha256_sum0(uint8_t *buf, const uint8_t *w)
+static inline sy_word
+sha256_sum0(sy_word w)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  sy_rotr_word(tmp1, w, 2);
-  sy_rotr_word(tmp2, w, 13);
-  sy_rotr_word(tmp3, w, 22);
-  sy_lxor_word3(buf, tmp1, tmp2, tmp3);
+  return sy_rotr_word(w, 2) ^ sy_rotr_word(w, 13) ^
+    sy_rotr_word(w, 22);
 }
 
-void
-_sy_sha256_sum0(uint8_t *buf, const uint8_t *w)
+sy_word
+_sy_sha256_sum0(sy_word w)
 {
-  sha256_sum0(buf, w);
+  return sha256_sum0(w);
 }
 
-static inline void
-sha256_sum1(uint8_t *buf, const uint8_t *w)
+static inline sy_word
+sha256_sum1(sy_word w)
 {
-  uint8_t tmp1[4], tmp2[4], tmp3[4];
-
-  sy_rotr_word(tmp1, w, 6);
-  sy_rotr_word(tmp2, w, 11);
-  sy_rotr_word(tmp3, w, 25);
-  sy_lxor_word3(buf, tmp1, tmp2, tmp3);
+  return sy_rotr_word(w, 6) ^ sy_rotr_word(w, 11) ^
+    sy_rotr_word(w, 25);
 }
 
-void
-_sy_sha256_sum1(uint8_t *buf, const uint8_t *w)
+sy_word
+_sy_sha256_sum1(sy_word w)
 {
-  sha256_sum1(buf, w);
+  return sha256_sum1(w);
 }
 
 void
@@ -290,13 +260,15 @@ sy_sha256(uint8_t *buf, const uint8_t *data, size_t len)
 void
 sy_sha256_init(sy_sha256_context *context)
 {
-  static uint8_t init[] = { 0x6a, 0x09, 0xe6, 0x67,
-    0xbb, 0x67, 0xae, 0x85, 0x3c, 0x6e, 0xf3, 0x72,
-    0xa5, 0x4f, 0xf5, 0x3a, 0x51, 0x0e, 0x52, 0x7f,
-    0x9b, 0x05, 0x68, 0x8c, 0x1f, 0x83, 0xd9, 0xab,
-    0x5b, 0xe0, 0xcd, 0x19};
+  context->state[0] = 0x6a09e667;
+  context->state[1] = 0xbb67ae85;
+  context->state[2] = 0x3c6ef372;
+  context->state[3] = 0xa54ff53a;
+  context->state[4] = 0x510e527f;
+  context->state[5] = 0x9b05688c;
+  context->state[6] = 0x1f83d9ab;
+  context->state[7] = 0x5be0cd19;
 
-  sy_memmove(context->state, init, SY_SHA256_STATE_LEN);
   sy_memzero(context->buf, SY_SHA256_BLOCK_LEN);
   context->buf_len = 0;
   context->total_len = 0;
@@ -345,81 +317,57 @@ sha256_update(uint8_t *block, size_t len, sy_sha256_context *context)
 }
 
 static inline void
-sha256_hash_block(uint8_t *block, const uint8_t *data)
+sha256_hash_block(sy_word *block, const uint8_t *data)
 {
-  uint8_t w[64*4], tmp1[4], tmp2[4], tmp3[4], a[4], b[4], c[4], d[4],
-          e[4], f[4], g[4], h[4];
+  volatile sy_word w[64];
+  sy_word a, b, c, d, e, f, g, h, tmp1, tmp2;
   unsigned int t;
 
-  sy_copy_words(w, data, 16*4);
-  for (t = 16; t < 64; t++) {
-    sha256_sigma1(tmp1, W(w, t-2));
-    sy_add_word(W(w, t), tmp1, W(w, t-7));
-    sha256_sigma0(tmp1, W(w, t-15));
-    sy_add_word(W(w, t), W(w, t), tmp1);
-    sy_add_word(W(w, t), W(w, t), W(w, t-16));
-  }
+  sy_encode_words(w, 0, data, 16*4);
+  for (t = 16; t < 64; t++)
+    w[t] = sha256_sigma1(w[t-2]) + w[t-7] +
+      sha256_sigma0(w[t-15]) + w[t-16];
 
-  sy_copy_word(a, block);
-  sy_copy_word(b, W(block, 1));
-  sy_copy_word(c, W(block, 2));
-  sy_copy_word(d, W(block, 3));
-  sy_copy_word(e, W(block, 4));
-  sy_copy_word(f, W(block, 5));
-  sy_copy_word(g, W(block, 6));
-  sy_copy_word(h, W(block, 7));
+  a = block[0];
+  b = block[1];
+  c = block[2];
+  d = block[3];
+  e = block[4];
+  f = block[5];
+  g = block[6];
+  h = block[7];
 
   for (t = 0; t < 64; t++) {
-    sha256_sum1(tmp2, e);
-    sy_add_word(tmp1, h, tmp2);
-    sha256_ch(tmp2, e, f, g);
-    sy_add_word(tmp1, tmp1, tmp2);
-    sy_set_word_value(tmp2, sha256_K[t]);
-    sy_add_word(tmp1, tmp1, tmp2);
-    sy_add_word(tmp1, tmp1, W(w, t));
-    sha256_sum0(tmp2, a);
-    sha256_maj(tmp3, a, b, c);
-    sy_add_word(tmp2, tmp2, tmp3);
-
-    sy_copy_word(h, g);
-    sy_copy_word(g, f);
-    sy_copy_word(f, e);
-    sy_add_word(e, d, tmp1);
-    sy_copy_word(d, c);
-    sy_copy_word(c, b);
-    sy_copy_word(b, a);
-    sy_add_word(a, tmp1, tmp2);
+    tmp1 = h + sha256_sum1(e) + sha256_ch(e, f, g) + sha256_K[t] + w[t];
+    tmp2 = sha256_sum0(a) + sha256_maj(a, b, c);
+    h = g;
+    g = f;
+    f = e;
+    e = d + tmp1;
+    d = c;
+    c = b;
+    b = a;
+    a = tmp1 + tmp2;
   }
 
-  sy_add_word(block, block, a);
-  sy_add_word(W(block, 1), W(block, 1), b);
-  sy_add_word(W(block, 2), W(block, 2), c);
-  sy_add_word(W(block, 3), W(block, 3), d);
-  sy_add_word(W(block, 4), W(block, 4), e);
-  sy_add_word(W(block, 5), W(block, 5), f);
-  sy_add_word(W(block, 6), W(block, 6), g);
-  sy_add_word(W(block, 7), W(block, 7), h);
+  block[0] += a;
+  block[1] += b;
+  block[2] += c;
+  block[3] += d;
+  block[4] += e;
+  block[5] += f;
+  block[6] += g;
+  block[7] += h;
 
   sy_memzero(w, 64*4);
-  sy_memzero_word(tmp1);
-  sy_memzero_word(tmp2);
-  sy_memzero_word(tmp3);
-  sy_memzero_word(a);
-  sy_memzero_word(b);
-  sy_memzero_word(c);
-  sy_memzero_word(d);
-  sy_memzero_word(e);
-  sy_memzero_word(f);
-  sy_memzero_word(g);
-  sy_memzero_word(h);
 }
 
 void
 sy_sha256_final(sy_sha256_context *context, uint8_t *buf)
 {
   sha256_update(context->buf, context->buf_len, context);
-  sy_memmove(buf, context->state, SY_SHA256_STATE_LEN);
-  sy_memzero(context->state, SY_SHA256_STATE_LEN);
+  sy_decode_words(buf, context->state, 0, SY_SHA256_STATE_LEN-1);
+  sy_clear_words(context->state, SY_SHA256_STATE_LEN/4);
   sy_memzero(context->buf, SY_SHA256_BLOCK_LEN);
 }
 
