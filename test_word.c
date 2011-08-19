@@ -455,53 +455,7 @@ test_clear_words()
   a[1] = 0xffffffff;
   e[0] = 0;
   e[1] = 0;
-  sy_clear_words(a, 0, 7);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0;
-  e[1] = 0x000000ff;;
-  sy_clear_words(a, 0, 6);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0;
-  e[1] = 0x0000ffff;;
-  sy_clear_words(a, 0, 5);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0;
-  e[1] = 0x00ffffff;;
-  sy_clear_words(a, 0, 4);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0;
-  e[1] = 0xffffffff;
-  sy_clear_words(a, 0, 3);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0x000000ff;
-  sy_clear_words(a, 0, 2);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0x0000ffff;;
-  sy_clear_words(a, 0, 1);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff;
-  a[1] = 0xffffffff;
-  e[0] = 0x00ffffff;
-  sy_clear_words(a, 0, 0);
+  sy_clear_words(a, 2);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
