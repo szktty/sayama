@@ -84,9 +84,6 @@ test_sha1_updates(void)
 void
 test_sha1_f()
 {
-  unsigned int t;
-  sy_word ac; 
-
   /* t < 20 */
   cut_assert(0x45d12aa0 ==
       _sy_sha1_f(3, 0x5d43e370, 0xc7ed262c, 0x59d148c0));
