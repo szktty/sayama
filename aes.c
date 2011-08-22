@@ -204,6 +204,7 @@ mul2(uint8_t v)
   else
     return v << 1;
 }
+
 static inline sy_word
 sub_word(sy_word w)
 {
