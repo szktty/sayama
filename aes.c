@@ -6,26 +6,27 @@
 
 typedef struct context context;
 
-#define BLOCK_LEN       16
+#define STATE_LEN       16
+#define STATE_WLEN      (STATE_LEN/4)
 #define MAX_KEY_LEN     64
-#define MAX_IV_LEN      BLOCK_LEN
+#define MAX_IV_LEN      STATE_LEN
 #define MAX_ROUND_KEYS  (SY_AES_KEY_256+6)
-#define ROUND_KEYS_LEN  ((MAX_ROUND_KEYS+1)*BLOCK_LEN*4)
+#define ROUND_KEYS_LEN  ((MAX_ROUND_KEYS+1)*STATE_LEN*4)
 
 struct context {
   SY_CIPHER_DIRECTION dir;              /* direction */
   SY_AES_KEYLEN keylen;                 /* key length */
   unsigned int nrounds;                 /* number of rounds */
-  uint8_t round_keys[ROUND_KEYS_LEN];   /* expanded key */
+  sy_word round_keys[ROUND_KEYS_LEN/4]; /* expanded key */
   uint8_t iv[MAX_IV_LEN];               /* initialization vector */
   SY_BLOCK_CIPHER_MODE mode;            /* block cipher mode */
-  uint8_t state[BLOCK_LEN];             /* state */
+  sy_word state[STATE_WLEN];            /* state */
 };
 
-static const uint8_t rcon[] = {
-  0x8d, 0, 0, 0, 0x01, 0, 0, 0, 0x02, 0, 0, 0, 0x04, 0, 0, 0,
-  0x08, 0, 0, 0, 0x10, 0, 0, 0, 0x20, 0, 0, 0, 0x40, 0, 0, 0,
-  0x80, 0, 0, 0, 0x1b, 0, 0, 0, 0x36, 0, 0, 0, 0x6c, 0, 0, 0
+static const sy_word rcon[] = {
+  0x8d000000U, 0x01000000U, 0x02000000U, 0x04000000U,
+  0x08000000U, 0x10000000U, 0x20000000U, 0x40000000U,
+  0x80000000U, 0x1b000000U, 0x36000000U, 0x6c000000U,
 };
 
 static const uint8_t sbox[] = {
@@ -79,14 +80,18 @@ static const uint8_t sbox[] = {
   0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-static inline void sub_word(uint8_t *w);
-static inline void rot_word(uint8_t *w);
-static inline void set_block(uint8_t *dest, const uint8_t *src);
-static void encrypt_block(uint8_t *block, uint8_t *round_keys,
+static inline void mix_columns(sy_word *block);
+static inline uint8_t mul2(uint8_t v);
+static inline sy_word sub_word(sy_word w);
+static inline sy_word rot_word(sy_word w);
+static inline unsigned int expand_key(sy_word *dest,
+    const uint8_t *key, SY_AES_KEYLEN keylen);
+static inline void set_block(sy_word *dest, const uint8_t *src);
+static void encrypt_block(sy_word *block, sy_word *round_keys,
     unsigned int round_count);
-static inline void sub_bytes(uint8_t *block);
-static inline void add_round_key(uint8_t *block, uint8_t *round_key);
-static inline void shift_rows(uint8_t *block);
+static inline void sub_bytes(sy_word *block);
+static inline void add_round_key(sy_word *block, sy_word *round_key);
+static inline void shift_rows(sy_word *block);
 
 bool
 sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
@@ -95,6 +100,10 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
 {
   context ctxt;
   size_t i;
+  volatile sy_word *state, *round_keys;
+
+  state = (volatile sy_word *)ctxt.state;
+  round_keys = (volatile sy_word *)ctxt.round_keys;
 
   /* validates key length */
   switch (keylen) {
@@ -120,7 +129,7 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
   }
 
   /* validate text length */
-  if (textlen % BLOCK_LEN != 0)
+  if (textlen % STATE_LEN != 0)
     return false;
 
   ctxt.dir = dir;
@@ -131,16 +140,15 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
     memcpy(ctxt.iv, iv, MAX_IV_LEN);
 
   /* expands key */
-  ctxt.nrounds = _sy_aes_expand_key((uint8_t *)ctxt.round_keys,
-      key, keylen);
+  ctxt.nrounds = expand_key(round_keys, key, keylen);
 
-  memset(ctxt.state, 0, BLOCK_LEN);
+  sy_clear_words(state, STATE_WLEN);
   switch (mode) {
   case SY_ECB_MODE:
-    for (i = 0; i < textlen; i += BLOCK_LEN) {
-      set_block(ctxt.state, text + i);
-      encrypt_block(ctxt.state, ctxt.round_keys, ctxt.nrounds);
-      set_block(dest + i, ctxt.state);
+    for (i = 0; i < textlen; i += STATE_LEN) {
+      set_block(state, text + i);
+      encrypt_block(state, round_keys, ctxt.nrounds);
+      sy_decode_words(dest + i/4, state, 0, STATE_LEN-1);
     }
     break;
 
@@ -148,76 +156,115 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
   }
 
   /* clear cipher data */
-  memset(ctxt.state, 0, BLOCK_LEN);
-  memset(ctxt.round_keys, 0, BLOCK_LEN);
+  sy_clear_words(state, STATE_WLEN);
+  sy_clear_words(round_keys, STATE_WLEN);
   return true;
 }
 
-static inline void
-sub_word(uint8_t *w)
+void
+_sy_aes_mix_columns(sy_word *block)
 {
-  w[0] = sbox[w[0]];
-  w[1] = sbox[w[1]];
-  w[2] = sbox[w[2]];
-  w[3] = sbox[w[3]];
+  mix_columns(block);
 }
 
 static inline void
-rot_word(uint8_t *w)
+mix_columns(sy_word *block)
 {
-  uint8_t tmp;
+  unsigned int i;
+  uint8_t o0, o1, o2, o3, t0, t1, t2, t3;
 
-  tmp = w[0];
-  w[0] = w[1];
-  w[1] = w[2];
-  w[2] = w[3];
-  w[3] = tmp;
+  for (i = 0; i < 4; i++) {
+    o0 = sy_word_get0(block[i]);
+    o1 = sy_word_get1(block[i]);
+    o2 = sy_word_get2(block[i]);
+    o3 = sy_word_get3(block[i]);
+    t0 = mul2(o0);
+    t1 = mul2(o1);
+    t2 = mul2(o2);
+    t3 = mul2(o3);
+    block[i] = sy_create_word(
+        t0        ^ (o1 ^ t1) ^ o2        ^ o3,
+        o0        ^ t1        ^ (o2 ^ t2) ^ o3,
+        o0        ^ o1        ^ t2        ^ (o3 ^ t3),
+        (o0 ^ t0) ^ o1        ^ o2        ^ t3);
+  }
+}
+
+uint8_t
+_sy_aes_mul2(uint8_t v)
+{
+  return mul2(v);
+}
+
+static inline uint8_t
+mul2(uint8_t v)
+{
+  if ((v & 0x80) != 0)
+    return (v << 1) ^ 0x011b;
+  else
+    return v << 1;
+}
+static inline sy_word
+sub_word(sy_word w)
+{
+  return sy_create_word(sbox[sy_word_get0(w)], sbox[sy_word_get1(w)],
+      sbox[sy_word_get2(w)], sbox[sy_word_get3(w)]);
+}
+
+static inline sy_word
+rot_word(sy_word w)
+{
+  return sy_create_word(sy_word_get1(w), sy_word_get2(w),
+      sy_word_get3(w), sy_word_get0(w));
 }
 
 /* Expands key into round keys. Returns number of rounds. */
 unsigned int
-_sy_aes_expand_key(uint8_t *dest, const uint8_t *key,
+_sy_aes_expand_key(sy_word *dest, const uint8_t *key,
     SY_AES_KEYLEN keylen)
+{
+  return expand_key(dest, key, keylen);
+}
+
+static inline unsigned int
+expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEYLEN keylen)
 {
   unsigned int nk; /* key length (word) */
   unsigned int nr; /* round count */
   unsigned int i, n;
-  uint8_t x[4];
+  sy_word x;
 
   /* first round key */
   nk = keylen / 32;
   nr = nk + 6;
-  sy_copy_words(dest, key, nk * 4);
+  sy_encode_words(dest, 0, key, nk * 4);
 
   /* rest rounds */
   n = (nr + 1) * 4;
-  sy_copy_words(x, dest + (nk-1)*4, 1);
+  x = dest[nk-1];
   for (i = nk; i < n; i++) {
-    if (i % nk == 0) {
-      rot_word(x);
-      sub_word(x);
-      sy_lxor_words(x, x, rcon + i/nk*4, 1);
-    }
+    if (i % nk == 0)
+      x = sub_word(rot_word(x)) ^ rcon[i/nk];
 
     /* 256 bit key length */
     if (nk == 8 && i % 8 == 4)
-      sub_word(x);
+      x = sub_word(x);
 
-    sy_lxor_words(x, x, dest + (i-nk)*4, 1);
-    sy_copy_words(dest + i*4, x, 1);
+    x ^= dest[i-nk];
+    dest[i] = x;
   }
 
   return nr + 1;
 }
 
 static inline void
-set_block(uint8_t *dest, const uint8_t *src)
+set_block(sy_word *dest, const uint8_t *src)
 {
-  memcpy(dest, src, BLOCK_LEN);
+  sy_encode_words(dest, 0, src, STATE_LEN);
 }
 
 static void
-encrypt_block(uint8_t *block, uint8_t *round_keys,
+encrypt_block(sy_word *block, sy_word *round_keys,
     unsigned int round_count)
 {
   unsigned int i;
@@ -227,52 +274,55 @@ encrypt_block(uint8_t *block, uint8_t *round_keys,
     sub_bytes(block);
     shift_rows(block);
     if (i < round_count - 1)
-      _sy_aes_mix_columns(block);
-    add_round_key(block, round_keys + i*BLOCK_LEN);
+      mix_columns(block);
+    add_round_key(block, round_keys + i*STATE_WLEN);
   }
 }
 
 static inline void
-sub_bytes(uint8_t *block)
+sub_bytes(sy_word *block)
 {
   unsigned int i;
 
-  for (i = 0; i < BLOCK_LEN; i += 4)
-    sub_word(block + i);
+  for (i = 0; i < STATE_WLEN; i++)
+    block[i] = sub_word(block[i]);
 }
 
 static inline void
-add_round_key(uint8_t *block, uint8_t *round_key)
+add_round_key(sy_word *block, sy_word *round_key)
 {
-  sy_lxor_words(block, block, round_key, 4);
+  block[0] ^= round_key[0];
+  block[1] ^= round_key[1];
+  block[2] ^= round_key[2];
+  block[3] ^= round_key[3];
 }
 
 static inline void
-shift_rows(uint8_t *block)
+shift_rows(sy_word *block)
 {
   uint8_t tmp;
 
   /* S[1,n] */
-  tmp = block[1];
-  block[1] = block[5];
-  block[5] = block[9];
-  block[9] = block[13];
-  block[13] = tmp;
+  tmp = sy_word_get(block, 1);
+  sy_word_set(block, 1, sy_word_get(block, 5));
+  sy_word_set(block, 5, sy_word_get(block, 9));
+  sy_word_set(block, 9, sy_word_get(block, 13));
+  sy_word_set(block, 13, tmp);
 
   /* S[2,n] */
-  tmp = block[2];
-  block[2] = block[10];
-  block[10] = tmp;
-  tmp = block[6];
-  block[6] = block[14];
-  block[14] = tmp;
+  tmp = sy_word_get(block, 2);
+  sy_word_set(block, 2, sy_word_get(block, 10));
+  sy_word_set(block, 10, tmp);
+  tmp = sy_word_get(block, 6);
+  sy_word_set(block, 6, sy_word_get(block, 14));
+  sy_word_set(block, 14, tmp);
 
   /* S[3,n] */
-  tmp = block[15];
-  block[15] = block[11];
-  block[11] = block[7];
-  block[7] = block[3];
-  block[3] = tmp;
+  tmp = sy_word_get(block, 15);
+  sy_word_set(block, 15, sy_word_get(block, 11));
+  sy_word_set(block, 11, sy_word_get(block, 7));
+  sy_word_set(block, 7, sy_word_get(block, 3));
+  sy_word_set(block, 3, tmp);
 }
 
 bool

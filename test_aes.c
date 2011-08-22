@@ -11,17 +11,15 @@ void test_aes_encrypt_ecb_128(void);
 void
 test_aes_mix_columns()
 {
-  uint8_t b[16] = { 
-    0xdb, 0x13, 0x53, 0x45, 0xf2, 0x0a, 0x22, 0x5c,
-    0x01, 0x01, 0x01, 0x01, 0xc6, 0xc6, 0xc6, 0xc6
+  sy_word w[4] = { 
+    0xdb135345, 0xf20a225c, 0x01010101, 0xc6c6c6c6
   };
-  uint8_t e[16] = {
-    0x8e, 0x4d, 0xa1, 0xbc, 0x9f, 0xdc, 0x58, 0x9d,
-    0x01, 0x01, 0x01, 0x01, 0xc6, 0xc6, 0xc6, 0xc6
+  sy_word e[4] = {
+    0x8e4da1bc, 0x9fdc589d, 0x01010101, 0xc6c6c6c6
   };
 
-  _sy_aes_mix_columns(b);
-  cut_assert_equal_bytes(e, b, 16, cut_message("mix column failed"));
+  _sy_aes_mix_columns(w);
+  cut_assert(sy_equal_words(e, 0, w, 0, 16));
 }
 
 void
@@ -41,19 +39,20 @@ void
 test_aes_expand_key_128()
 {
 #define NR          11
-#define KEYS        (NR*4)
+#define KEYS        NR*4
 #define KEYS_LEN    (KEYS*4)
 
   uint8_t key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  uint8_t round_keys[KEYS_LEN], expected_keys[KEYS_LEN];
+  sy_word round_keys[KEYS], expected_keys[KEYS];
+  uint8_t tmp[KEYS_LEN];
   unsigned int nr;
 
-  memset(round_keys, 0, KEYS);
-  sy_load_bytes(expected_keys, "test_aes_key_128.txt", KEYS_LEN);
+  sy_clear_words(round_keys, KEYS);
+  sy_load_bytes(tmp, "test_aes_key_128.txt", KEYS_LEN);
+  sy_encode_words(expected_keys, 0, tmp, KEYS_LEN);
   nr = _sy_aes_expand_key(round_keys, key, SY_AES_KEY_128);
   cut_assert(NR == nr, cut_message("unexpected round count"));
-  cut_assert_equal_bytes(expected_keys, round_keys, KEYS_LEN,
-      cut_message("unexpected key"));
+  cut_assert(sy_equal_words(expected_keys, 0, round_keys, 0, KEYS));
 }
 
 void
