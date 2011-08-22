@@ -12,6 +12,8 @@ extern "C"
 
 typedef uint32_t sy_word;
 
+static inline sy_word sy_create_word(uint8_t b0, uint8_t b1,
+    uint8_t b2, uint8_t b3);
 static inline void sy_encode_words(sy_word *words, size_t from,
     const uint8_t *bytes, size_t len);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
@@ -23,6 +25,10 @@ static inline sy_word sy_rotr_word(sy_word word, size_t n);
 static inline void sy_copy_words(sy_word *dest, size_t from_dest,
     const sy_word *src, size_t from_src, size_t to_src);
 static inline void sy_clear_words(volatile sy_word *words, size_t wlen);
+static inline uint8_t sy_word_get0(sy_word w);
+static inline uint8_t sy_word_get1(sy_word w);
+static inline uint8_t sy_word_get2(sy_word w);
+static inline uint8_t sy_word_get3(sy_word w);
 static inline uint8_t sy_word_get(const sy_word *words, size_t i);
 static inline void sy_word_set(sy_word *words, size_t i, uint8_t v);
 
@@ -31,6 +37,12 @@ extern void sy_fill_words(sy_word *words, uint8_t v,
 
 #define SY_WORD_BYTE_SHIFT(i)   ((3-(i)%4)*8)
 #define SY_WORD_BYTE_MASK(i)    (0xffU << SY_WORD_BYTE_SHIFT(i))
+
+static inline sy_word
+sy_create_word(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3)
+{
+  return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
+}
 
 static inline void
 sy_encode_words(sy_word *words, size_t from, const uint8_t *bytes,
@@ -101,6 +113,30 @@ sy_word_get(const sy_word *words, size_t i)
 {
   return ((words[i/4] & SY_WORD_BYTE_MASK(i)) >>
       SY_WORD_BYTE_SHIFT(i)) & 0xffU;
+}
+
+static inline uint8_t
+sy_word_get0(sy_word w)
+{
+  return (w >> 24) & 0xffU;
+}
+
+static inline uint8_t
+sy_word_get1(sy_word w)
+{
+  return (w >> 16) & 0xffU;
+}
+
+static inline uint8_t
+sy_word_get2(sy_word w)
+{
+  return (w >> 8) & 0xffU;
+}
+
+static inline uint8_t
+sy_word_get3(sy_word w)
+{
+  return w & 0xffU;
 }
 
 static inline void
