@@ -21,6 +21,7 @@ void test_sha256_sum1(void);
 void test_sha256_one_block_msg(void);
 void test_sha256_multi_block_msg(void);
 void test_sha256_long_msg(void);
+void test_sha256_updates(void);
 void test_sha256_copy(void);
 
 void
@@ -227,6 +228,26 @@ test_sha256_long_msg()
   sy_sha256_final(&context, a);
   cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
   free(msg);
+}
+
+void
+test_sha256_updates()
+{
+  const char msg[] = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+  uint8_t e[32], a[32];
+  sy_sha256_context context;
+
+  sy_load_bytes(e, "test_sha256_multi_block_msg_digest.txt", 32);
+  sy_sha256_init(&context);
+  sy_sha256_update(&context, (uint8_t *)msg, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+8, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+16, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+24, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+32, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+40, 8);
+  sy_sha256_update(&context, (uint8_t *)msg+48, 8);
+  sy_sha256_final(&context, a);
+  cut_assert_equal_bytes(e, a, 32, cut_message("unexpected digest"));
 }
 
 void
