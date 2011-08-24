@@ -459,3 +459,18 @@ test_clear_words()
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
+void
+test_hexify_words(void)
+{
+  sy_word words[] = {0x01234567, 0x89abcdef};
+  char buf[100];
+
+  memset(buf, 0, 100);
+  sy_hexify_words(buf, words, 0, 7);
+  cut_assert_equal_string("0123456789abcdef", buf);
+
+  memset(buf, 0, 100);
+  sy_hexify_words(buf, words, 2, 5);
+  cut_assert_equal_string("456789ab", buf);
+}
+
