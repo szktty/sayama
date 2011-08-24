@@ -43,7 +43,7 @@ digest_sha1_copy(sy_digest_context *dest, const sy_digest_context *src)
 }
 
 void
-sy_digest_digest(uint8_t *dest, const uint8_t *bytes,
+sy_digest(uint8_t *dest, const uint8_t *bytes,
     size_t len, const sy_digester *digester)
 {
   sy_digest_context context;

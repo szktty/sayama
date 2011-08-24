@@ -31,7 +31,7 @@ struct sy_digester {
 
 extern const sy_digester sy_digester_sha1;
 
-extern void sy_digest_digest(uint8_t *dest, const uint8_t *bytes,
+extern void sy_digest(uint8_t *dest, const uint8_t *bytes,
     size_t len, const sy_digester *digester);
 extern void sy_digest_init(sy_digest_context *context,
     const sy_digester *digester);
