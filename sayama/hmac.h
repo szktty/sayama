@@ -26,6 +26,8 @@ extern void sy_hmac_init(sy_hmac_context *context, const uint8_t *key,
 extern void sy_hmac_update(sy_hmac_context *context, const uint8_t *bytes,
     size_t len);
 extern void sy_hmac_final(sy_hmac_context *context, uint8_t *dest);
+extern void sy_hmac_copy(sy_hmac_context *dest,
+    const sy_hmac_context *src);
 
 #ifdef __cplusplus
 }

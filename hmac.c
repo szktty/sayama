@@ -1,3 +1,4 @@
+#include <string.h>
 #include "sayama/bytes.h"
 #include "sayama/hmac.h"
 #include "sayama/memory.h"
@@ -71,5 +72,13 @@ sy_hmac_final(sy_hmac_context *context, uint8_t *dest)
   sy_memzero(inner, SY_HMAC_BLOCK_LEN);
   sy_memzero(opad_key, SY_HMAC_BLOCK_LEN);
   sy_memzero(context->key, SY_HMAC_BLOCK_LEN);
+}
+
+void
+sy_hmac_copy(sy_hmac_context *dest, const sy_hmac_context *src)
+{
+  dest->digester = src->digester;
+  memcpy(dest->key, src->key, SY_HMAC_BLOCK_LEN);
+  sy_digest_copy(&dest->inner, &src->inner);
 }
 
