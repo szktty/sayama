@@ -18,6 +18,7 @@ typedef struct sy_sha256_context    sy_sha256_context;
 #define SY_SHA1_STATE_WLEN      (SY_SHA1_STATE_LEN/4)
 #define SY_SHA1_BLOCK_LEN       64
 #define SY_SHA256_STATE_LEN     32
+#define SY_SHA256_STATE_WLEN    (SY_SHA256_STATE_LEN/4)
 #define SY_SHA256_BLOCK_LEN     64
 
 struct sy_sha1_context {
@@ -46,6 +47,8 @@ extern void sy_sha256_init(sy_sha256_context *context);
 extern void sy_sha256_update(sy_sha256_context *context,
     const uint8_t *data, size_t len);
 extern void sy_sha256_final(sy_sha256_context *context, uint8_t *buf);
+extern void sy_sha256_copy(sy_sha256_context *dest,
+    const sy_sha256_context *src);
 
 #ifdef __cplusplus
 }

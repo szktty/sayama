@@ -380,3 +380,14 @@ sy_sha256_final(sy_sha256_context *context, uint8_t *buf)
   sy_memzero(context->buf, SY_SHA256_BLOCK_LEN);
 }
 
+void
+sy_sha256_copy(sy_sha256_context *dest,
+    const sy_sha256_context *src)
+{
+  sy_copy_words(dest->state, 0, src->state, 0, SY_SHA256_STATE_LEN-1);
+  sy_memcpy(dest->buf, src->buf, SY_SHA256_BLOCK_LEN);
+  dest->buf_len = src->buf_len;
+  dest->total_len = src->total_len;
+}
+
+
