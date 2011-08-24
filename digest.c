@@ -5,11 +5,14 @@ static void digest_sha1_init(sy_digest_context *context);
 static void digest_sha1_update(sy_digest_context *context,
     const uint8_t *bytes, size_t len);
 static void digest_sha1_final(sy_digest_context *context, uint8_t *dest);
+static void digest_sha1_copy(sy_digest_context *dest,
+    const sy_digest_context *src);
 
 const sy_digester sy_digester_sha1 = {
   digest_sha1_init,
   digest_sha1_update,
   digest_sha1_final,
+  digest_sha1_copy,
   64,
   20
 };
@@ -31,6 +34,12 @@ static void
 digest_sha1_final(sy_digest_context *context, uint8_t *dest)
 {
   sy_sha1_final(&context->context.sha1, dest);
+}
+
+static void
+digest_sha1_copy(sy_digest_context *dest, const sy_digest_context *src)
+{
+  sy_sha1_copy(&dest->context.sha1, &src->context.sha1);
 }
 
 void
@@ -62,6 +71,12 @@ void
 sy_digest_final(sy_digest_context *context, uint8_t *dest)
 {
   context->digester->final(context, dest);
+}
+
+void
+sy_digest_copy(sy_digest_context *dest, const sy_digest_context *src)
+{
+  src->digester->copy(dest, src);
 }
 
 size_t
