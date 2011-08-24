@@ -41,7 +41,7 @@ extern void sy_digest_final(sy_digest_context *context, uint8_t *dest);
 extern void sy_digest_copy(sy_digest_context *dest,
     const sy_digest_context *src);
 extern size_t sy_digest_block_len(const sy_digest_context *context);
-extern size_t sy_digest_digest_len(const sy_digest_context *context);
+extern size_t sy_digest_len(const sy_digest_context *context);
 
 #ifdef __cplusplus
 }

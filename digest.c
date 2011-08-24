@@ -87,7 +87,7 @@ sy_digest_block_len(const sy_digest_context *context)
 }
 
 size_t
-sy_digest_digest_len(const sy_digest_context *context)
+sy_digest_len(const sy_digest_context *context)
 {
   return context->digester->digest_len;
 }
