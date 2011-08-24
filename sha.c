@@ -173,6 +173,15 @@ sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
 }
 
+void
+sy_sha1_copy(sy_sha1_context *dest, const sy_sha1_context *src)
+{
+  sy_copy_words(dest->state, 0, src->state, 0, SY_SHA1_STATE_LEN-1);
+  sy_memcpy(dest->buf, src->buf, SY_SHA1_BLOCK_LEN);
+  dest->buf_len = src->buf_len;
+  dest->total_len = src->total_len;
+}
+
 static inline sy_word
 sha256_sigma0(sy_word w)
 {

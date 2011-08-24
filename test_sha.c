@@ -8,6 +8,7 @@ void test_sha1_short_bytes(void);
 void test_sha1_long_bytes(void);
 void test_sha1_block_len_bytes(void);
 void test_sha1_updates(void);
+void test_sha1_copy(void);
 void test_sha1_f(void);
 void test_sha1_hash_block(void);
 
@@ -79,6 +80,25 @@ test_sha1_updates(void)
   sy_sha1_update(&context, (uint8_t *)m3, strlen(m3));
   sy_sha1_final(&context, a);
   cut_assert_equal_bytes(e, a, 20, cut_message("unexpected digest"));
+}
+
+void
+test_sha1_copy()
+{
+  const char *src = "hello, world!";
+  uint8_t a[200], e[200];
+  sy_sha1_context c1, c2;
+
+  sy_load_bytes(e, "test_sha1_short_bytes_digest.txt", 20);
+  sy_sha1_init(&c1);
+  sy_sha1_update(&c1, (uint8_t *)src, strlen(src));
+  sy_sha1_copy(&c2, &c1);
+  sy_sha1_final(&c1, a);
+  cut_assert_equal_bytes(e, a, 20);
+
+  memset(a, 0, 20);
+  sy_sha1_final(&c2, a);
+  cut_assert_equal_bytes(e, a, 20);
 }
 
 void
