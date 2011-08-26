@@ -17,6 +17,7 @@ typedef struct sy_sha256_context    sy_sha256_context;
 #define SY_SHA1_STATE_LEN       20
 #define SY_SHA1_STATE_WLEN      (SY_SHA1_STATE_LEN/4)
 #define SY_SHA1_BLOCK_LEN       64
+#define SY_SHA256_DIGEST_LEN    32
 #define SY_SHA256_STATE_LEN     32
 #define SY_SHA256_STATE_WLEN    (SY_SHA256_STATE_LEN/4)
 #define SY_SHA256_BLOCK_LEN     64

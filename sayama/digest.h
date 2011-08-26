@@ -15,6 +15,7 @@ struct sy_digest_context {
   const sy_digester *digester;
   union {
     sy_sha1_context sha1;
+    sy_sha256_context sha256;
     void *p; /* custom digester */
   } context;
 };
@@ -30,6 +31,7 @@ struct sy_digester {
 };
 
 extern const sy_digester sy_digester_sha1;
+extern const sy_digester sy_digester_sha256;
 
 extern void sy_digest(uint8_t *dest, const uint8_t *bytes,
     size_t len, const sy_digester *digester);
