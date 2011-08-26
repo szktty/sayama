@@ -6,7 +6,7 @@
 #include "sayama/utils.h"
 
 void
-sy_hmac_digest(uint8_t *dest, const uint8_t *key, size_t key_len,
+sy_hmac(uint8_t *dest, const uint8_t *key, size_t key_len,
     const uint8_t *msg, size_t msg_len,
     const sy_digester *digester)
 {
@@ -80,5 +80,23 @@ sy_hmac_copy(sy_hmac_context *dest, const sy_hmac_context *src)
   dest->digester = src->digester;
   memcpy(dest->key, src->key, SY_HMAC_BLOCK_LEN);
   sy_digest_copy(&dest->inner, &src->inner);
+}
+
+const sy_digester *
+sy_hmac_digester(const sy_hmac_context *context)
+{
+  return context->digester;
+}
+
+size_t
+sy_hmac_digest_block_len(const sy_hmac_context *context)
+{
+  return context->digester->block_len;
+}
+
+size_t
+sy_hmac_digest_len(const sy_hmac_context *context)
+{
+  return context->digester->digest_len;
 }
 
