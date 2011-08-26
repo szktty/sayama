@@ -80,6 +80,12 @@ sy_digest_copy(sy_digest_context *dest, const sy_digest_context *src)
   src->digester->copy(dest, src);
 }
 
+const sy_digester *
+sy_digest_digester(const sy_digest_context *context)
+{
+  return context->digester;
+}
+
 size_t
 sy_digest_block_len(const sy_digest_context *context)
 {
