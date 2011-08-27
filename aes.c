@@ -11,13 +11,14 @@ typedef struct context context;
 #define MAX_KEY_LEN     64
 #define MAX_IV_LEN      STATE_LEN
 #define MAX_ROUND_KEYS  (SY_AES_KEY_256+6)
-#define ROUND_KEYS_LEN  ((MAX_ROUND_KEYS+1)*STATE_LEN*4)
+#define ROUND_KEYS_WLEN ((MAX_ROUND_KEYS+1)*STATE_LEN)
+#define ROUND_KEYS_LEN  (ROUND_KEYS_WLEN*4)
 
 struct context {
   SY_CIPHER_DIRECTION dir;              /* direction */
-  SY_AES_KEYLEN keylen;                 /* key length */
+  SY_AES_KEY_LEN key_len;               /* key length */
   unsigned int nrounds;                 /* number of rounds */
-  sy_word round_keys[ROUND_KEYS_LEN/4]; /* expanded key */
+  sy_word round_keys[ROUND_KEYS_WLEN];  /* expanded key */
   uint8_t iv[MAX_IV_LEN];               /* initialization vector */
   SY_BLOCK_CIPHER_MODE mode;            /* block cipher mode */
   sy_word state[STATE_WLEN];            /* state */
@@ -85,7 +86,7 @@ static inline uint8_t mul2(uint8_t v);
 static inline sy_word sub_word(sy_word w);
 static inline sy_word rot_word(sy_word w);
 static inline unsigned int expand_key(sy_word *dest,
-    const uint8_t *key, SY_AES_KEYLEN keylen);
+    const uint8_t *key, SY_AES_KEY_LEN key_len);
 static inline void set_block(sy_word *dest, const uint8_t *src);
 static void encrypt_block(sy_word *block, sy_word *round_keys,
     unsigned int round_count);
@@ -93,10 +94,11 @@ static inline void sub_bytes(sy_word *block);
 static inline void add_round_key(sy_word *block, sy_word *round_key);
 static inline void shift_rows(sy_word *block);
 
-bool
-sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
-    SY_CIPHER_DIRECTION dir, const uint8_t *iv,
-    const uint8_t *text, size_t textlen, SY_BLOCK_CIPHER_MODE mode)
+extern bool
+sy_aes(uint8_t *dest, SY_AES_KEY_LEN key_len,
+    SY_BLOCK_CIPHER_MODE mode, SY_CIPHER_DIRECTION dir,
+    const uint8_t *key,  const uint8_t *iv,
+    const uint8_t *text, size_t text_len)
 {
   context ctxt;
   size_t i;
@@ -106,11 +108,11 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
   round_keys = (volatile sy_word *)ctxt.round_keys;
 
   /* validates key length */
-  switch (keylen) {
+  switch (key_len) {
   case SY_AES_KEY_128:
   case SY_AES_KEY_192:
   case SY_AES_KEY_256:
-    ctxt.keylen = keylen;
+    ctxt.key_len = key_len;
     break;
   default:
     return false;
@@ -129,7 +131,7 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
   }
 
   /* validate text length */
-  if (textlen % STATE_LEN != 0)
+  if (text_len % STATE_LEN != 0)
     return false;
 
   ctxt.dir = dir;
@@ -140,12 +142,12 @@ sy_aes(uint8_t *dest, const uint8_t *key, SY_AES_KEYLEN keylen,
     memcpy(ctxt.iv, iv, MAX_IV_LEN);
 
   /* expands key */
-  ctxt.nrounds = expand_key(round_keys, key, keylen);
+  ctxt.nrounds = expand_key(round_keys, key, key_len);
 
   sy_clear_words(state, STATE_WLEN);
   switch (mode) {
   case SY_ECB_MODE:
-    for (i = 0; i < textlen; i += STATE_LEN) {
+    for (i = 0; i < text_len; i += STATE_LEN) {
       set_block(state, text + i);
       encrypt_block(state, round_keys, ctxt.nrounds);
       sy_decode_words(dest + i/4, state, 0, STATE_LEN-1);
@@ -222,13 +224,13 @@ rot_word(sy_word w)
 /* Expands key into round keys. Returns number of rounds. */
 unsigned int
 _sy_aes_expand_key(sy_word *dest, const uint8_t *key,
-    SY_AES_KEYLEN keylen)
+    SY_AES_KEY_LEN key_len)
 {
-  return expand_key(dest, key, keylen);
+  return expand_key(dest, key, key_len);
 }
 
 static inline unsigned int
-expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEYLEN keylen)
+expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEY_LEN key_len)
 {
   unsigned int nk; /* key length (word) */
   unsigned int nr; /* round count */
@@ -236,7 +238,7 @@ expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEYLEN keylen)
   sy_word x;
 
   /* first round key */
-  nk = keylen / 32;
+  nk = key_len / 32;
   nr = nk + 6;
   sy_encode_words(dest, 0, key, nk * 4);
 
@@ -324,59 +326,5 @@ shift_rows(sy_word *block)
   sy_word_set(block, 11, sy_word_get(block, 7));
   sy_word_set(block, 7, sy_word_get(block, 3));
   sy_word_set(block, 3, tmp);
-}
-
-bool
-sy_aes128_encrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 128, SY_ENCRYPT, iv, text,
-      textlen, mode);
-}
-
-bool
-sy_aes128_decrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 128, SY_DECRYPT, iv, text,
-      textlen, mode);
-}
-
-bool
-sy_aes192_encrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 192, SY_ENCRYPT, iv, text,
-      textlen, mode);
-}
-
-bool
-sy_aes192_decrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 192, SY_DECRYPT, iv, text,
-      textlen, mode);
-}
-
-bool
-sy_aes256_encrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 256, SY_ENCRYPT, iv, text,
-      textlen, mode);
-}
-
-bool
-sy_aes256_decrypt(uint8_t *dest, const uint8_t *key,
-    const uint8_t *iv, const uint8_t *text, size_t textlen,
-    SY_BLOCK_CIPHER_MODE mode)
-{
-  return sy_aes(dest, key, 256, SY_DECRYPT, iv, text,
-      textlen, mode);
 }
 

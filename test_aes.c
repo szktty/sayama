@@ -63,8 +63,8 @@ test_aes_encrypt_ecb_128(void)
   sy_load_bytes(key, "test_aes_encrypt_ecb_128_key.txt", 16);
   sy_load_bytes(text, "test_aes_encrypt_ecb_128_text.txt", 16);
   sy_load_bytes(expected, "test_aes_encrypt_ecb_128_enc.txt", 16);
-  cut_assert(sy_aes(enc, key, SY_AES_KEY_128, SY_ENCRYPT,
-        NULL, text, 16, SY_ECB_MODE),
+  cut_assert(sy_aes(enc, SY_AES_KEY_128, SY_ECB_MODE, SY_ENCRYPT,
+        key, NULL, text, 16),
       cut_message("encrypt failed"));
   cut_assert_equal_bytes(expected, enc, 16,
       cut_message("unexpected cipher text"));
