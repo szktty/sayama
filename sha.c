@@ -390,4 +390,32 @@ sy_sha256_copy(sy_sha256_context *dest,
   dest->total_len = src->total_len;
 }
 
+void
+sy_sha512(uint8_t *buf, const uint8_t *data, size_t len)
+{
+  /* TODO */
+}
+
+void
+sy_sha512_init(sy_sha512_context *context)
+{
+  /* TODO */
+}
+
+void
+sy_sha512_update(sy_sha512_context *context, const uint8_t *data, size_t len)
+{
+  /* TODO */
+}
+
+void
+sy_sha512_final(sy_sha512_context *context, uint8_t *buf)
+{
+  /* TODO */
+}
+
+void sy_sha512_copy(sy_sha512_context *dest, const sy_sha512_context *src)
+{
+  /* TODO */
+}
 

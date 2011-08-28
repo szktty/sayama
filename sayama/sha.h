@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sayama/word.h>
+#include <sayama/dword.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -13,6 +14,7 @@ extern "C"
 
 typedef struct sy_sha1_context      sy_sha1_context;
 typedef struct sy_sha256_context    sy_sha256_context;
+typedef struct sy_sha512_context    sy_sha512_context;
 
 #define SY_SHA1_STATE_LEN       20
 #define SY_SHA1_STATE_WLEN      (SY_SHA1_STATE_LEN/4)
@@ -21,6 +23,10 @@ typedef struct sy_sha256_context    sy_sha256_context;
 #define SY_SHA256_STATE_LEN     32
 #define SY_SHA256_STATE_WLEN    (SY_SHA256_STATE_LEN/4)
 #define SY_SHA256_BLOCK_LEN     64
+#define SY_SHA512_DIGEST_LEN    64
+#define SY_SHA512_STATE_LEN     64
+#define SY_SHA512_STATE_DWLEN   (SY_SHA512_STATE_LEN/8)
+#define SY_SHA512_BLOCK_LEN     128
 
 struct sy_sha1_context {
   sy_word state[SY_SHA1_STATE_WLEN];
@@ -30,10 +36,17 @@ struct sy_sha1_context {
 };
 
 struct sy_sha256_context {
-  sy_word state[SY_SHA256_STATE_LEN/4];
+  sy_word state[SY_SHA256_STATE_WLEN];
   uint8_t buf[SY_SHA256_BLOCK_LEN];
   size_t buf_len;
   size_t total_len;
+};
+
+struct sy_sha512_context {
+  sy_dword state[SY_SHA512_STATE_DWLEN];
+  uint8_t buf[SY_SHA512_BLOCK_LEN];
+  size_t buf_len;
+  uint64_t total_len[2];
 };
 
 extern void sy_sha1(uint8_t *buf, const uint8_t *data, size_t len);
@@ -50,6 +63,14 @@ extern void sy_sha256_update(sy_sha256_context *context,
 extern void sy_sha256_final(sy_sha256_context *context, uint8_t *buf);
 extern void sy_sha256_copy(sy_sha256_context *dest,
     const sy_sha256_context *src);
+
+extern void sy_sha512(uint8_t *buf, const uint8_t *data, size_t len);
+extern void sy_sha512_init(sy_sha512_context *context);
+extern void sy_sha512_update(sy_sha512_context *context,
+    const uint8_t *data, size_t len);
+extern void sy_sha512_final(sy_sha512_context *context, uint8_t *buf);
+extern void sy_sha512_copy(sy_sha512_context *dest,
+    const sy_sha512_context *src);
 
 #ifdef __cplusplus
 }
