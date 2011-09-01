@@ -113,7 +113,7 @@ sha1_hash_block(sy_word *block, const uint8_t *data)
   sy_word a, b, c, d, e, tmp;
   unsigned int t;
 
-  sy_encode_words(w, 0, data, 16*4);
+  sy_encode_words(w, data, 16);
   for (t = 16; t < 80; t++)
     w[t] = sy_rotl_word(w[t-3] ^ w[t-8] ^ w[t-14] ^ w[t-16], 1);
 
@@ -332,7 +332,7 @@ sha256_hash_block(sy_word *block, const uint8_t *data)
   sy_word a, b, c, d, e, f, g, h, tmp1, tmp2;
   unsigned int t;
 
-  sy_encode_words(w, 0, data, 16*4);
+  sy_encode_words(w, data, 16);
   for (t = 16; t < 64; t++)
     w[t] = sha256_sigma1(w[t-2]) + w[t-7] +
       sha256_sigma0(w[t-15]) + w[t-16];

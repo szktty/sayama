@@ -49,7 +49,7 @@ test_aes_expand_key_128()
 
   sy_clear_words(round_keys, KEYS);
   sy_load_bytes(tmp, "test_aes_key_128.txt", KEYS_LEN);
-  sy_encode_words(expected_keys, 0, tmp, KEYS_LEN);
+  sy_encode_words(expected_keys, tmp, KEYS);
   nr = _sy_aes_expand_key(round_keys, key, SY_AES_KEY_128);
   cut_assert(NR == nr, cut_message("unexpected round count"));
   cut_assert(sy_equal_words(expected_keys, 0, round_keys, 0, KEYS));

@@ -15,8 +15,8 @@ typedef uint32_t sy_word;
 
 static inline sy_word sy_create_word(uint8_t b0, uint8_t b1,
     uint8_t b2, uint8_t b3);
-static inline void sy_encode_words(sy_word *words, size_t from,
-    const uint8_t *bytes, size_t len);
+static inline void sy_encode_words(sy_word *words,
+    const uint8_t *bytes, size_t wlen);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
     size_t from, size_t to);
 static inline bool sy_equal_words(const sy_word *words1, size_t from1,
@@ -48,13 +48,13 @@ sy_create_word(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3)
 }
 
 static inline void
-sy_encode_words(sy_word *words, size_t from, const uint8_t *bytes,
-    size_t len)
+sy_encode_words(sy_word *words, const uint8_t *bytes, size_t wlen)
 {
   size_t i;
 
-  for (i = 0; i < len; i++)
-    sy_word_set(words, from + i, bytes[i]);
+  for (i = 0; i < wlen; i++)
+    words[i] = sy_create_word(bytes[i*4], bytes[i*4+1],
+        bytes[i*4+2], bytes[i*4+3]);
 }
 
 static inline void

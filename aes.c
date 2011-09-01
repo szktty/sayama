@@ -240,7 +240,7 @@ expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEY_LEN key_len)
   /* first round key */
   nk = key_len / 32;
   nr = nk + 6;
-  sy_encode_words(dest, 0, key, nk * 4);
+  sy_encode_words(dest, key, nk);
 
   /* rest rounds */
   n = (nr + 1) * 4;
@@ -263,7 +263,7 @@ expand_key(sy_word *dest, const uint8_t *key, SY_AES_KEY_LEN key_len)
 static inline void
 set_block(sy_word *dest, const uint8_t *src)
 {
-  sy_encode_words(dest, 0, src, STATE_LEN);
+  sy_encode_words(dest, src, STATE_WLEN);
 }
 
 static void

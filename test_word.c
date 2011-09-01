@@ -21,62 +21,11 @@ test_encode_words()
   sy_word a[2], e[] = {0x12345678, 0x9abcdef0};
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
-  sy_encode_words(a, 0, w, 8);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
+  sy_encode_words(a, w, 1);
+  cut_assert(e[0] == a[0] && e[1] != a[1], cut_message("unexpected word"));
 
   a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[1] = 0x9abcdeff;
-  sy_encode_words(a, 0, w, 7);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[1] = 0x9abcffff;
-  sy_encode_words(a, 0, w, 6);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[1] = 0x9affffff;
-  sy_encode_words(a, 0, w, 5);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0x12345678;
-  sy_encode_words(a, 0, w, 4);
-  cut_assert(e[0] == a[0], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0x123456ff;
-  sy_encode_words(a, 0, w, 3);
-  cut_assert(e[0] == a[0], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0x1234ffff;
-  sy_encode_words(a, 0, w, 2);
-  cut_assert(e[0] == a[0], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0x12ffffff;
-  sy_encode_words(a, 0, w, 1);
-  cut_assert(e[0] == a[0], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0xffffff12; e[1] = 0x3456ffff;
-  sy_encode_words(a, 3, w, 3);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0xffffffff; e[1] = 0xff123456;
-  sy_encode_words(a, 5, w, 3);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0xff123456; e[1] = 0x789affff;
-  sy_encode_words(a, 1, w, 5);
-  cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
-
-  a[0] = 0xffffffff; a[1] = 0xffffffff;
-  e[0] = 0xff1234ff; e[1] = 0xffffffff;
-  sy_encode_words(a, 1, w, 2);
+  sy_encode_words(a, w, 2);
   cut_assert(e[0] == a[0] && e[1] == a[1], cut_message("unexpected word"));
 }
 
