@@ -30,7 +30,7 @@ static inline uint8_t sy_word_get0(sy_word w);
 static inline uint8_t sy_word_get1(sy_word w);
 static inline uint8_t sy_word_get2(sy_word w);
 static inline uint8_t sy_word_get3(sy_word w);
-static inline uint8_t sy_word_get(const sy_word *words, size_t i);
+static inline uint8_t sy_words_get(const sy_word *words, size_t i);
 static inline void sy_word_set(sy_word *words, size_t i, uint8_t v);
 static inline void sy_hexify_words(char *buf, const sy_word *words,
     size_t from, size_t to);
@@ -79,7 +79,7 @@ sy_equal_words(const sy_word *words1, size_t from1,
   size_t i;
 
   for (i = 0; i < len; i++) {
-    if (sy_word_get(words1, from1 + i) != sy_word_get(words2, from2 + i))
+    if (sy_words_get(words1, from1 + i) != sy_words_get(words2, from2 + i))
       return false;
   }
   return true;
@@ -104,7 +104,7 @@ sy_copy_words(sy_word *dest, size_t from_dest,
   size_t i;
 
   for (i = from_src; i <= to_src; i++)
-    sy_word_set(dest, from_dest + i - from_src, sy_word_get(src, i));
+    sy_word_set(dest, from_dest + i - from_src, sy_words_get(src, i));
 }
 
 static inline void
@@ -117,7 +117,7 @@ sy_clear_words(volatile sy_word *words, size_t wlen)
 }
 
 static inline uint8_t
-sy_word_get(const sy_word *words, size_t i)
+sy_words_get(const sy_word *words, size_t i)
 {
   return ((words[i/4] & SY_WORD_BYTE_MASK(i)) >>
       SY_WORD_BYTE_SHIFT(i)) & 0xffU;
@@ -160,7 +160,7 @@ sy_hexify_words(char *buf, const sy_word *words, size_t from, size_t to)
   size_t i;
 
   for (i = 0; i <= to - from; i++)
-    sy_hexify_byte(buf+i*2, sy_word_get(words, i+from));
+    sy_hexify_byte(buf+i*2, sy_words_get(words, i+from));
 }
 
 #ifdef __cplusplus
