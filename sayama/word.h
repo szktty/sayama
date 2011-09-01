@@ -18,7 +18,7 @@ static inline sy_word sy_create_word(uint8_t b0, uint8_t b1,
 static inline void sy_encode_words(sy_word *words,
     const uint8_t *bytes, size_t wlen);
 static inline void sy_decode_words(uint8_t *bytes, const sy_word *words,
-    size_t from, size_t to);
+    size_t wlen);
 static inline bool sy_equal_words(const sy_word *words1, size_t from1,
     const sy_word *words2, size_t from2, size_t len);
 static inline sy_word sy_rotl_word(sy_word word, size_t n);
@@ -58,13 +58,18 @@ sy_encode_words(sy_word *words, const uint8_t *bytes, size_t wlen)
 }
 
 static inline void
-sy_decode_words(uint8_t *bytes, const sy_word *words,
-    size_t from, size_t to)
+sy_decode_words(uint8_t *bytes, const sy_word *words, size_t wlen)
 {
   size_t i;
+  sy_word w;
 
-  for (i = from; i <= to; i++)
-    bytes[i-from] = sy_word_get(words, i);
+  for (i = 0; i < wlen; i++) {
+    w = words[i];
+    bytes[i*4] = sy_word_get0(w);
+    bytes[i*4+1] = sy_word_get1(w);
+    bytes[i*4+2] = sy_word_get2(w);
+    bytes[i*4+3] = sy_word_get3(w);
+  }
 }
 
 static inline bool

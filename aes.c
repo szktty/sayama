@@ -150,7 +150,7 @@ sy_aes(uint8_t *dest, SY_AES_KEY_LEN key_len,
     for (i = 0; i < text_len; i += STATE_LEN) {
       set_block(state, text + i);
       encrypt_block(state, round_keys, ctxt.nrounds);
-      sy_decode_words(dest + i/4, state, 0, STATE_LEN-1);
+      sy_decode_words(dest + i/4, state, STATE_WLEN);
     }
     break;
 

@@ -168,8 +168,8 @@ void
 sy_sha1_final(sy_sha1_context *context, uint8_t *dest)
 {
   sha1_update(context->buf, context->buf_len, context);
-  sy_decode_words(dest, context->state, 0, SY_SHA1_STATE_LEN-1);
-  sy_clear_words(context->state, SY_SHA1_STATE_LEN/4);
+  sy_decode_words(dest, context->state, SY_SHA1_STATE_WLEN);
+  sy_clear_words(context->state, SY_SHA1_STATE_WLEN);
   sy_memzero(context->buf, SY_SHA1_BLOCK_LEN);
 }
 
@@ -375,8 +375,8 @@ void
 sy_sha256_final(sy_sha256_context *context, uint8_t *buf)
 {
   sha256_update(context->buf, context->buf_len, context);
-  sy_decode_words(buf, context->state, 0, SY_SHA256_STATE_LEN-1);
-  sy_clear_words(context->state, SY_SHA256_STATE_LEN/4);
+  sy_decode_words(buf, context->state, SY_SHA256_STATE_WLEN);
+  sy_clear_words(context->state, SY_SHA256_STATE_WLEN);
   sy_memzero(context->buf, SY_SHA256_BLOCK_LEN);
 }
 
