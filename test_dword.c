@@ -2,7 +2,23 @@
 #include "sayama/utils.h"
 #include "cut-extends.h"
 
+void test_dword_get(void);
 void test_encode_dwords(void);
+
+void
+test_dword_get()
+{
+  sy_dword w = 0x0123456789abcdef;
+
+  cut_assert_equal_uint(0x01, sy_dword_get(w, 0));
+  cut_assert_equal_uint(0x23, sy_dword_get(w, 1));
+  cut_assert_equal_uint(0x45, sy_dword_get(w, 2));
+  cut_assert_equal_uint(0x67, sy_dword_get(w, 3));
+  cut_assert_equal_uint(0x89, sy_dword_get(w, 4));
+  cut_assert_equal_uint(0xab, sy_dword_get(w, 5));
+  cut_assert_equal_uint(0xcd, sy_dword_get(w, 6));
+  cut_assert_equal_uint(0xef, sy_dword_get(w, 7));
+}
 
 void
 test_encode_dwords()

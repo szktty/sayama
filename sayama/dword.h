@@ -13,10 +13,8 @@ extern "C"
 
 typedef uint64_t sy_dword;
 
-static inline uint8_t sy_dword_get(sy_dword w);
-static inline uint8_t sy_dwords_get(const sy_dword *words);
+static inline uint8_t sy_dword_get(sy_dword w, uint8_t i);
 static inline sy_dword sy_dword_set(sy_dword w, uint8_t i, uint8_t v);
-static inline void sy_dwords_set(const sy_dword *words, uint8_t i, uint8_t v);
 
 static inline sy_dword sy_create_dword(uint8_t b0, uint8_t b1,
     uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7);
@@ -32,6 +30,22 @@ static inline void sy_copy_dwords(sy_dword *dest,
 static inline void sy_clear_dwords(volatile sy_dword *words, size_t len);
 
 static inline sy_dword sy_rotr_dword(sy_dword w, size_t n);
+
+static inline uint8_t
+sy_dword_get(sy_dword w, uint8_t i)
+{
+  switch (i) {
+  case 0: return (w >> 56) & 0xff;
+  case 1: return (w >> 48) & 0xff;
+  case 2: return (w >> 40) & 0xff;
+  case 3: return (w >> 32) & 0xff;
+  case 4: return (w >> 24) & 0xff;
+  case 5: return (w >> 16) & 0xff;
+  case 6: return (w >> 8) & 0xff;
+  case 7: return w & 0xff;
+  default: return 0; /* error */
+  }
+}
 
 static inline sy_dword
 sy_create_dword(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3,
