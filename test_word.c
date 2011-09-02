@@ -364,11 +364,11 @@ test_hexify_words(void)
   char buf[100];
 
   memset(buf, 0, 100);
-  sy_hexify_words(buf, words, 0, 7);
-  cut_assert_equal_string("0123456789abcdef", buf);
+  sy_hexify_words(buf, words, 1);
+  cut_assert_equal_string("01234567", buf);
 
   memset(buf, 0, 100);
-  sy_hexify_words(buf, words, 2, 5);
-  cut_assert_equal_string("456789ab", buf);
+  sy_hexify_words(buf, words, 2);
+  cut_assert_equal_string("0123456789abcdef", buf);
 }
 

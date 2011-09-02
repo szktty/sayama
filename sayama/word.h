@@ -33,7 +33,7 @@ static inline uint8_t sy_word_get3(sy_word w);
 static inline uint8_t sy_words_get(const sy_word *words, size_t i);
 static inline void sy_words_set(sy_word *words, size_t i, uint8_t v);
 static inline void sy_hexify_words(char *buf, const sy_word *words,
-    size_t from, size_t to);
+    size_t wlen);
 
 extern void sy_fill_words(sy_word *words, uint8_t v,
     size_t from, size_t to);
@@ -155,12 +155,17 @@ sy_words_set(sy_word *words, size_t i, uint8_t v)
 }
 
 static inline void
-sy_hexify_words(char *buf, const sy_word *words, size_t from, size_t to)
+sy_hexify_words(char *buf, const sy_word *words, size_t wlen)
 {
-  size_t i;
+  size_t i, j;
 
-  for (i = 0; i <= to - from; i++)
-    sy_hexify_byte(buf+i*2, sy_words_get(words, i+from));
+  for (i = 0; i < wlen; i++) {
+    j = i * 4;
+    sy_hexify_byte(buf+j*2, sy_words_get(words, j));
+    sy_hexify_byte(buf+(j+1)*2, sy_words_get(words, j+1));
+    sy_hexify_byte(buf+(j+2)*2, sy_words_get(words, j+2));
+    sy_hexify_byte(buf+(j+3)*2, sy_words_get(words, j+3));
+  }
 }
 
 #ifdef __cplusplus
