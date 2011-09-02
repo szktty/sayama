@@ -48,6 +48,22 @@ sy_dword_get(sy_dword w, uint8_t i)
 }
 
 static inline sy_dword
+sy_dword_set(sy_dword w, uint8_t i, uint8_t v)
+{
+  switch (i) {
+  case 0: return (w & ~((sy_dword)0xff << 56)) | ((sy_dword)v << 56);
+  case 1: return (w & ~((sy_dword)0xff << 48)) | ((sy_dword)v << 48);
+  case 2: return (w & ~((sy_dword)0xff << 40)) | ((sy_dword)v << 40);
+  case 3: return (w & ~((sy_dword)0xff << 32)) | ((sy_dword)v << 32);
+  case 4: return (w & ~((sy_dword)0xff << 24)) | ((sy_dword)v << 24);
+  case 5: return (w & ~((sy_dword)0xff << 16)) | ((sy_dword)v << 16);
+  case 6: return (w & ~((sy_dword)0xff << 8)) | ((sy_dword)v << 8);
+  case 7: return (w & ~((sy_dword)0xff)) | (sy_dword)v;
+  default: return 0; /* error */
+  }
+}
+
+static inline sy_dword
 sy_create_dword(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3,
     uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7)
 {

@@ -3,6 +3,7 @@
 #include "cut-extends.h"
 
 void test_dword_get(void);
+void test_dword_set(void);
 void test_encode_dwords(void);
 
 void
@@ -18,6 +19,21 @@ test_dword_get()
   cut_assert_equal_uint(0xab, sy_dword_get(w, 5));
   cut_assert_equal_uint(0xcd, sy_dword_get(w, 6));
   cut_assert_equal_uint(0xef, sy_dword_get(w, 7));
+}
+
+void
+test_dword_set()
+{
+  sy_dword w = 0x0123456789abcdef;
+
+  cut_assert_equal_dword(0x2823456789abcdef, sy_dword_set(w, 0, 0x28));
+  cut_assert_equal_dword(0x0135456789abcdef, sy_dword_set(w, 1, 0x35));
+  cut_assert_equal_dword(0x0123aa6789abcdef, sy_dword_set(w, 2, 0xaa));
+  cut_assert_equal_dword(0x012345aa89abcdef, sy_dword_set(w, 3, 0xaa));
+  cut_assert_equal_dword(0x01234567aaabcdef, sy_dword_set(w, 4, 0xaa));
+  cut_assert_equal_dword(0x0123456789aacdef, sy_dword_set(w, 5, 0xaa));
+  cut_assert_equal_dword(0x0123456789abaaef, sy_dword_set(w, 6, 0xaa));
+  cut_assert_equal_dword(0x0123456789abcdaa, sy_dword_set(w, 7, 0xaa));
 }
 
 void
