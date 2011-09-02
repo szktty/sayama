@@ -11,7 +11,7 @@ DYLIB = $(DynamicCLibrary $(LIB_NAME), $(OBJS))
 CFLAGS += -I/usr/local/include/cutter
 LDFLAGS += -lcutter
 CUTTER = cutter
-TEST_OBJS = test_aes test_bytes test_hmac test_memory test_sha test_word
+TEST_OBJS = test_aes test_bytes test_dword test_hmac test_memory test_sha test_word
 TEST_LIB_NAME = test_sayama
 TEST_LIB = $(DynamicCLibrary $(TEST_LIB_NAME), $(OBJS) $(TEST_OBJS))
 

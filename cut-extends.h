@@ -12,4 +12,6 @@
   } while (0)
 
 #define cut_assert_equal_word cut_assert_equal_uint_fast32
+#define cut_assert_equal_dword cut_assert_equal_uint_fast64
+#define cut_assert_not_equal_dword cut_assert_not_equal_uint_fast64
 
