@@ -307,24 +307,24 @@ shift_rows(sy_word *block)
 
   /* S[1,n] */
   tmp = sy_words_get(block, 1);
-  sy_word_set(block, 1, sy_words_get(block, 5));
-  sy_word_set(block, 5, sy_words_get(block, 9));
-  sy_word_set(block, 9, sy_words_get(block, 13));
-  sy_word_set(block, 13, tmp);
+  sy_words_set(block, 1, sy_words_get(block, 5));
+  sy_words_set(block, 5, sy_words_get(block, 9));
+  sy_words_set(block, 9, sy_words_get(block, 13));
+  sy_words_set(block, 13, tmp);
 
   /* S[2,n] */
   tmp = sy_words_get(block, 2);
-  sy_word_set(block, 2, sy_words_get(block, 10));
-  sy_word_set(block, 10, tmp);
+  sy_words_set(block, 2, sy_words_get(block, 10));
+  sy_words_set(block, 10, tmp);
   tmp = sy_words_get(block, 6);
-  sy_word_set(block, 6, sy_words_get(block, 14));
-  sy_word_set(block, 14, tmp);
+  sy_words_set(block, 6, sy_words_get(block, 14));
+  sy_words_set(block, 14, tmp);
 
   /* S[3,n] */
   tmp = sy_words_get(block, 15);
-  sy_word_set(block, 15, sy_words_get(block, 11));
-  sy_word_set(block, 11, sy_words_get(block, 7));
-  sy_word_set(block, 7, sy_words_get(block, 3));
-  sy_word_set(block, 3, tmp);
+  sy_words_set(block, 15, sy_words_get(block, 11));
+  sy_words_set(block, 11, sy_words_get(block, 7));
+  sy_words_set(block, 7, sy_words_get(block, 3));
+  sy_words_set(block, 3, tmp);
 }
 

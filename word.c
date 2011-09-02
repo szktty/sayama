@@ -27,7 +27,7 @@ sy_fill_words(sy_word *words, uint8_t v, size_t from, size_t to)
     }
   } else {
     for (i = from; i <= to; i++)
-      sy_word_set(words, i, v);
+      sy_words_set(words, i, v);
   }
 }
 
