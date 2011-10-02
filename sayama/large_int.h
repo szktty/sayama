@@ -29,6 +29,9 @@ static inline void sy_init_large_int(sy_large_int_header *hdr, SY_DIGIT *d,
 static inline void sy_copy_large_int(sy_large_int_header *dest_hdr,
     SY_DIGIT *dest_d, const sy_large_int_header *src_hdr,
     const SY_DIGIT *src_d);
+
+extern size_t sy_large_int_get_str(char *s, unsigned int base,
+      const sy_large_int_header *hdr, const SY_DIGIT *d);
 extern bool sy_large_int_set_str(sy_large_int_header *hdr, SY_DIGIT *d,
     const char *s, unsigned int base);
 extern void sy_large_int_set_long(sy_large_int_header *hdr, SY_DIGIT *d,
@@ -83,6 +86,13 @@ sy_copy_large_int(sy_large_int_header *dest_hdr, SY_DIGIT *dest_d,
   sy_copy_large_int_##bits(sy_large_int_##bits *dest, \
     const sy_large_int_##bits *src) { \
     sy_copy_large_int(&dest->hdr, dest->d, &src->hdr, src->d); \
+  } \
+\
+  static inline size_t \
+  sy_large_int_##bits##_get_str(char *s, unsigned int base, \
+      const sy_large_int_##bits *v) \
+  { \
+    return sy_large_int_get_str(s, base, &v->hdr, v->d); \
   } \
 \
   static inline bool \
