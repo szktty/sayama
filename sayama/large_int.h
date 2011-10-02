@@ -11,6 +11,12 @@ extern "C"
 {
 #endif
 
+#define SY_DIGIT_BITS       32
+#define SY_DIGIT            uint32_t
+#define SY_DIGIT_DBL        uint64_t
+#define SY_DIGIT_MAX        UINT32_MAX
+#define SY_DIGIT_DBL_MAX    UINT64_MAX
+
 typedef struct sy_large_int_header  sy_large_int_header;
 
 struct sy_large_int_header {
@@ -18,53 +24,53 @@ struct sy_large_int_header {
   unsigned int len;
 };
 
-static inline void sy_init_large_int(sy_large_int_header *hdr, uint32_t *d,
+static inline void sy_init_large_int(sy_large_int_header *hdr, SY_DIGIT *d,
     unsigned int len);
 static inline void sy_copy_large_int(sy_large_int_header *dest_hdr,
-    uint32_t *dest_d, const sy_large_int_header *src_hdr,
-    const uint32_t *src_d);
-extern bool sy_large_int_set_str(sy_large_int_header *hdr, uint32_t *d,
+    SY_DIGIT *dest_d, const sy_large_int_header *src_hdr,
+    const SY_DIGIT *src_d);
+extern bool sy_large_int_set_str(sy_large_int_header *hdr, SY_DIGIT *d,
     const char *s, unsigned int base);
-extern void sy_large_int_set_long(sy_large_int_header *hdr, uint32_t *d,
+extern void sy_large_int_set_long(sy_large_int_header *hdr, SY_DIGIT *d,
     long l);
-extern void sy_large_int_set_ulong(sy_large_int_header *hdr, uint32_t *d,
+extern void sy_large_int_set_ulong(sy_large_int_header *hdr, SY_DIGIT *d,
     unsigned long ul);
 
 extern int sy_compare_large_ints(const sy_large_int_header *left_hdr,
-    const uint32_t *left_d, const sy_large_int_header *right_hdr,
-    const uint32_t *right_d);
+    const SY_DIGIT *left_d, const sy_large_int_header *right_hdr,
+    const SY_DIGIT *right_d);
 
 extern bool sy_add_large_ints(sy_large_int_header *res_hdr,
-    uint32_t *res_d, const sy_large_int_header *left_hdr,
-    const uint32_t *left_d, const sy_large_int_header *right_hdr,
-    const uint32_t *right_d);
+    SY_DIGIT *res_d, const sy_large_int_header *left_hdr,
+    const SY_DIGIT *left_d, const sy_large_int_header *right_hdr,
+    const SY_DIGIT *right_d);
 extern bool sy_sub_large_ints(sy_large_int_header *res_hdr,
-    uint32_t *res_d, const sy_large_int_header *left_hdr,
-    const uint32_t *left_d, const sy_large_int_header *right_hdr,
-    const uint32_t *right_d);
+    SY_DIGIT *res_d, const sy_large_int_header *left_hdr,
+    const SY_DIGIT *left_d, const sy_large_int_header *right_hdr,
+    const SY_DIGIT *right_d);
 
 static inline void
-sy_init_large_int(sy_large_int_header *hdr, uint32_t *d, unsigned int len)
+sy_init_large_int(sy_large_int_header *hdr, SY_DIGIT *d, unsigned int len)
 {
   hdr->sign = true;
   hdr->len = len;
-  memset(d, 0, sizeof(uint32_t) * len);
+  memset(d, 0, sizeof(SY_DIGIT) * len);
 }
 
 static inline void
-sy_copy_large_int(sy_large_int_header *dest_hdr, uint32_t *dest_d,
-   const sy_large_int_header *src_hdr, const uint32_t *src_d)
+sy_copy_large_int(sy_large_int_header *dest_hdr, SY_DIGIT *dest_d,
+   const sy_large_int_header *src_hdr, const SY_DIGIT *src_d)
 {
   dest_hdr->sign = src_hdr->sign;
-  memcpy(dest_d, src_d, sizeof(uint32_t) * dest_hdr->len);
+  memcpy(dest_d, src_d, sizeof(SY_DIGIT) * dest_hdr->len);
 }
 
 #define SY_DEF_LARGE_INT_FUNCS(bits) \
-  _SY_DEF_LARGE_INT_FUNCS(bits, (bits/32))
+  _SY_DEF_LARGE_INT_FUNCS(bits, (bits/SY_DIGIT_BITS))
 #define _SY_DEF_LARGE_INT_FUNCS(bits, dlen) \
   typedef struct sy_large_int_##bits { \
     sy_large_int_header hdr; \
-    uint32_t d[(dlen)]; \
+    SY_DIGIT d[(dlen)]; \
   } sy_large_int_##bits; \
 \
   static inline void \
